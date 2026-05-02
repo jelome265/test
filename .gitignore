@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.expo/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Firebase (per-environment, not committed)
+apps/mobile/google-services.json
+apps/mobile/GoogleService-Info.plist
+
+# EAS
+apps/mobile/.expo/
+apps/mobile/ios/
+apps/mobile/android/
+
+# Coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+
+# Supabase
+supabase/.branches/
+supabase/.temp/

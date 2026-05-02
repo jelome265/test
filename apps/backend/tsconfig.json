@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@courier/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@courier/shared-validation": ["../../packages/shared-validation/src/index.ts"],
+      "@courier/shared-constants": ["../../packages/shared-constants/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["test/**/*", "dist/**/*"]
+}

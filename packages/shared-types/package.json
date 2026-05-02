@@ -1,0 +1,16 @@
+{
+  "name": "@courier/shared-types",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests for shared-types'",
+    "lint": "eslint . --ext .ts --max-warnings 0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

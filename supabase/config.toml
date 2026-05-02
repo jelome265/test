@@ -1,0 +1,46 @@
+[api]
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+port = 54323
+enabled = true
+
+[inbucket]
+port = 54324
+smtp_port = 54325
+pop3_port = 54326
+
+[storage]
+file_size_limit = "50MiB"
+
+[auth]
+# Development: localhost mobile dev server
+site_url = "http://localhost:8081"
+additional_redirect_urls = [
+  "https://yourcourier.com",
+  "courierapp://",
+  "exp+courierapp://"
+]
+jwt_expiry = 3600
+enable_signup = true
+# Mobile apps skip email confirmation — verify via phone or magic link in prod
+email_confirm_changes = false
+
+[auth.email]
+enable_confirmations = false
+secure_password_change = true
+
+[auth.sms]
+enable_signup = false
+
+[realtime]
+enabled = true
+# Tables using realtime: shipments, notifications (added in migration 013)
