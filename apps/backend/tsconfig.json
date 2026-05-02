@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
     "paths": {
       "@courier/shared-types": ["../../packages/shared-types/src/index.ts"],
