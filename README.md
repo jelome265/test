@@ -8,6 +8,8 @@ This platform solves a **set of operational, trust, and financial problems** tha
 
 ## 1.1 Fragmented delivery requests
 
+
+
 Today, courier requests in many small-to-mid operations are handled through calls, WhatsApp, paper notes, or informal staff memory. That creates:
 
 * lost requests
