@@ -15,6 +15,8 @@
  * Examples: VALIDATION_ERROR, UNAUTHORIZED, SHIPMENT_NOT_FOUND, PAYMENT_FAILED
  */
 
+import type { ZodError } from 'zod';
+
 // ─── Base class ───────────────────────────────────────────────────────────────
 
 export interface AppErrorOptions {
@@ -79,7 +81,7 @@ export class AppError extends Error {
  * Formats a ZodError into a structured ValidationDetail array.
  * Used by error middleware and manual validation blocks.
  */
-export function formatZodError(err: import('zod').ZodError): ValidationDetail[] {
+export function formatZodError(err: ZodError): ValidationDetail[] {
   return err.issues.map((issue) => ({
     field:   issue.path.join('.') || '_root',
     message: issue.message,

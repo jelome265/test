@@ -16,8 +16,8 @@
  * knows about req.user throughout the application.
  */
 
-import type { NextFunction, Request, Response } from 'express';
 import type { UserRole } from '@courier/shared-types';
+import type { NextFunction, Request, Response } from 'express';
 
 import { supabaseServiceRole } from '../config/supabase.js';
 import {
@@ -44,6 +44,7 @@ export interface AuthenticatedUser {
 }
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: AuthenticatedUser;

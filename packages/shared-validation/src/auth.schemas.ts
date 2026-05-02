@@ -28,7 +28,9 @@ export const LoginSchema = z.object({
 });
 
 export const UpdateFCMTokenSchema = z.object({
-  fcm_token: z.string().min(1).max(500),
+  // null clears the token (user revoked push permissions)
+  // string updates/replaces the current token
+  fcm_token: z.string().min(1).max(500).nullable(),
 });
 
 export const RefreshTokenSchema = z.object({

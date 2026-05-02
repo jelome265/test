@@ -31,8 +31,8 @@ import http from 'http';
 
 import { createApp }  from './app.js';
 import { env }        from './config/env.js';
-import { getRedis, closeRedis } from './config/redis.js';
 import { getFirebaseApp }       from './config/firebase.js';
+import { getRedis, closeRedis } from './config/redis.js';
 import { supabaseServiceRole }  from './config/supabase.js';
 import { logger }               from './utils/logger.js';
 

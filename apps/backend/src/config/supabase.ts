@@ -80,7 +80,7 @@ export function supabaseAsUser(accessToken: string): SupabaseClient {
         Authorization: `Bearer ${accessToken}`,
       },
     },
-  });
+  }) as SupabaseClient;
 }
 
 // ─── Health check ─────────────────────────────────────────────────────────────

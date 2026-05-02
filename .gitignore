@@ -7,12 +7,15 @@ node_modules/
 dist/
 build/
 .expo/
+.turbo/
 *.tsbuildinfo
 
 # Environment
 .env
 .env.local
 .env.*.local
+.env.test
+.env.test.local
 
 # Firebase (per-environment, not committed)
 apps/mobile/google-services.json

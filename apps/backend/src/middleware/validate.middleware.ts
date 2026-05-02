@@ -28,7 +28,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { type ZodSchema } from 'zod';
 
-import { ValidationError, type ValidationDetail, formatZodError } from '../errors/app-error.js';
+import { ValidationError, type ValidationDetail } from '../errors/app-error.js';
 
 type ValidationTarget = 'body' | 'query' | 'params';
 
@@ -54,10 +54,7 @@ export function validate(schema: ZodSchema, target: ValidationTarget = 'body'): 
     }
 
     // Replace the raw input with the validated (and potentially transformed) value.
-    // TypeScript: req[target] is typed as Record<string, string> for query/params,
-    // but our schemas produce richer types — we cast safely here.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (req as any)[target] = result.data;
+    (req as unknown as Record<string, unknown>)[target] = result.data;
 
     next();
   };

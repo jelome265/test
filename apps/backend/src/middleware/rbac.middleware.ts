@@ -26,8 +26,8 @@
  * Implicit hierarchy hides privilege escalation bugs. Explicit is safer.
  */
 
-import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { UserRole } from '@courier/shared-types';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
 import { AuthenticationError, AuthorizationError } from '../errors/app-error.js';
 

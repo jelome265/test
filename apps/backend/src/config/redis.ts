@@ -13,8 +13,9 @@
 
 import { Redis } from 'ioredis';
 
-import { env, isTest } from './env.js';
 import { logger } from '../utils/logger.js';
+
+import { env, isTest } from './env.js';
 
 // ─── Retry strategy ───────────────────────────────────────────────────────────
 function retryStrategy(times: number): number | null {

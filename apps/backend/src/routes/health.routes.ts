@@ -19,13 +19,13 @@
 
 import { Router } from 'express';
 
-import { checkSupabaseHealth } from '../config/supabase.js';
-import { checkRedisHealth } from '../config/redis.js';
+import { env } from '../config/env.js';
 import { checkFirebaseHealth } from '../config/firebase.js';
+import { checkRedisHealth } from '../config/redis.js';
+import { checkSupabaseHealth } from '../config/supabase.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { requireAdminRole } from '../middleware/rbac.middleware.js';
 import { asyncHandler } from '../utils/async-handler.js';
-import { env } from '../config/env.js';
 
 export const healthRouter = Router();
 

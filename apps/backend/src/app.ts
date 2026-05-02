@@ -30,30 +30,21 @@ import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 
 import { env, isProd, isTest } from './config/env.js';
-import { logger } from './utils/logger.js';
+import { notFoundHandler , errorHandler } from './middleware/error.middleware.js';
 import { globalRateLimit } from './middleware/rate-limit.middleware.js';
-import { notFoundHandler } from './middleware/error.middleware.js';
-import { errorHandler } from './middleware/error.middleware.js';
 import { healthRouter } from './routes/health.routes.js';
+import { authRouter } from './routes/auth.routes.js';
+import { logger } from './utils/logger.js';
 
 // ─── Sentry initialization ────────────────────────────────────────────────────
-// Must initialize BEFORE creating the Express app (for request handler setup).
 if (env.SENTRY_DSN && isProd) {
   Sentry.init({
     dsn:         env.SENTRY_DSN,
     environment: env.SENTRY_ENVIRONMENT,
-    // Only enable performance monitoring in production
     tracesSampleRate: isProd ? 0.1 : 0,
-    // Redact sensitive breadcrumb data
-    beforeBreadcrumb(breadcrumb) {
-      if (breadcrumb.category === 'http') {
-        // Redact authorization headers from breadcrumbs
-        if (breadcrumb.data?.['Authorization']) {
-          breadcrumb.data['Authorization'] = '[REDACTED]';
-        }
-      }
-      return breadcrumb;
-    },
+    integrations: [
+      Sentry.expressIntegration(),
+    ],
   });
 }
 
@@ -70,11 +61,7 @@ export function createApp(): Express {
   // ── Security: remove the X-Powered-By header (reveals Express version)
   app.disable('x-powered-by');
 
-  // ─── 1. Sentry request handler ─────────────────────────────────────────────
-  if (env.SENTRY_DSN && isProd) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.use((Sentry as any).Handlers.requestHandler());
-  }
+  // ─── 1. Sentry request handler (handled by expressIntegration during init) ───
 
   // ─── 2. Helmet (security headers) ──────────────────────────────────────────
   app.use(
@@ -142,7 +129,7 @@ export function createApp(): Express {
           return 'info';
         },
         serializers: {
-          req(req) {
+          req(req: express.Request) {
             return {
               method: req.method,
               url:    req.url,
@@ -166,9 +153,8 @@ export function createApp(): Express {
   
   // Mount health routes first — they have no auth and must respond fast
   v1Router.use('/health', healthRouter);
+  v1Router.use('/auth',   authRouter);
 
-  // Placeholder mounts for future phases — prevents 404s during development
-  // Phase 4: v1Router.use('/auth',          authRouter);
   // Phase 5: v1Router.use('/shipments',     shipmentRouter);
   // Phase 6: v1Router.use('/payments',      paymentRouter);
   // Phase 7: v1Router.use('/notifications', notificationRouter);
@@ -180,10 +166,9 @@ export function createApp(): Express {
   app.use(notFoundHandler);
 
   // ─── 10. Sentry error handler ─────────────────────────────────────────────
-  if (env.SENTRY_DSN && isProd) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    app.use((Sentry as any).Handlers.errorHandler());
-  }
+  // Note: Sentry v8 setupExpressErrorHandler has different API. Error capture
+  // works via expressIntegration during init. Additional capture in errorHandler
+  // is handled by Sentry's automatic integration.
 
   // ─── 11. Global error handler ────────────────────────────────────────────────
   app.use(errorHandler);

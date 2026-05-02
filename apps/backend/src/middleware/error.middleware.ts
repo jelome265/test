@@ -23,13 +23,13 @@
  * and 'message' for display to users.
  */
 
-import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
+import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 
+import { isDev } from '../config/env.js';
 import { AppError, ValidationError, InternalError, formatZodError } from '../errors/app-error.js';
 import { logger } from '../utils/logger.js';
-import { isDev } from '../config/env.js';
 
 // ─── Error normalizer ─────────────────────────────────────────────────────────
 // Converts any thrown value into an AppError subclass.

@@ -23,9 +23,9 @@
  * are multiplied by instance count.
  */
 
+import { GLOBAL_RATE_LIMIT_PER_15MIN, AUTH_RATE_LIMIT_PER_15MIN, PAYMENT_RATE_LIMIT_PER_HOUR } from '@courier/shared-constants';
 import rateLimit from 'express-rate-limit';
 
-import { GLOBAL_RATE_LIMIT_PER_15MIN, AUTH_RATE_LIMIT_PER_15MIN, PAYMENT_RATE_LIMIT_PER_HOUR } from '@courier/shared-constants';
 import { RateLimitError } from '../errors/app-error.js';
 
 // ─── Helper: rate limiter factory ────────────────────────────────────────────

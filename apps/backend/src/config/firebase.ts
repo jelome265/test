@@ -10,8 +10,9 @@
 
 import admin from 'firebase-admin';
 
-import { env, isTest } from './env.js';
 import { logger } from '../utils/logger.js';
+
+import { env, isTest } from './env.js';
 
 let _app: admin.app.App | null = null;
 
@@ -57,11 +58,10 @@ export function getFirebaseMessaging(): admin.messaging.Messaging {
 }
 
 // ─── Health check ─────────────────────────────────────────────────────────────
-export async function checkFirebaseHealth(): Promise<{ ok: boolean }> {
+export function checkFirebaseHealth(): { ok: boolean } {
   try {
-    // Lightweight check: list apps verifies SDK is alive without an API call
-    const app = getFirebaseApp();
-    return { ok: app.name !== '' };
+    getFirebaseApp();
+    return { ok: true };
   } catch {
     return { ok: false };
   }
