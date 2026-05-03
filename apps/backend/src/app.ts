@@ -35,6 +35,8 @@ import { globalRateLimit } from './middleware/rate-limit.middleware.js';
 import { healthRouter } from './routes/health.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { shipmentRouter, adminShipmentRouter } from './routes/shipment.routes.js';
+import { paymentRouter } from './routes/payment.routes.js';
+import { webhookRouter } from './routes/webhook.routes.js';
 import { logger } from './utils/logger.js';
 
 // ─── Sentry initialization ────────────────────────────────────────────────────
@@ -100,6 +102,11 @@ export function createApp(): Express {
     }),
   );
 
+  // ─── WEBHOOK ROUTE — mounted BEFORE express.json() ────────────────────────
+  // CRITICAL: The webhook handler uses its own body parser (express.raw).
+  // It MUST be registered before the global express.json() middleware.
+  app.use('/api/v1/webhooks', webhookRouter);
+
   // ─── 5. Body parsers ─────────────────────────────────────────────────────────
   app.use(
     express.json({
@@ -157,6 +164,7 @@ export function createApp(): Express {
   v1Router.use('/auth',   authRouter);
   v1Router.use('/shipments', shipmentRouter);
   v1Router.use('/admin',     adminShipmentRouter);
+  v1Router.use('/payments',  paymentRouter);
 
   // Phase 6: v1Router.use('/payments',      paymentRouter);
   // Phase 7: v1Router.use('/notifications', notificationRouter);

@@ -53,6 +53,12 @@ const EnvSchema = z.object({
     .min(32, 'PAYCHANGU_WEBHOOK_SECRET must be at least 32 characters for HMAC security'),
   PAYCHANGU_BASE_URL: z.string().url().default('https://api.paychangu.com'),
 
+  // ─── Backend URL (for webhook callback construction) ──────────────
+  BACKEND_BASE_URL: z
+    .string()
+    .url()
+    .default('http://localhost:3000'),
+
   // ─── Firebase ────────────────────────────────────────────────────────────
   FIREBASE_PROJECT_ID: z.string().min(1),
   FIREBASE_CLIENT_EMAIL: z.string().email(),

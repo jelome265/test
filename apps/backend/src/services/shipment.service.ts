@@ -630,7 +630,7 @@ class ShipmentService {
     targetStatus: ShipmentStatus,
     actorId:      string,
     actorRole:    UserRole,
-    actorIp:      string,
+    _actorIp:      string,
     context:      TransitionContext = {},
   ): Promise<Shipment> {
     // Load current state for pre-validation

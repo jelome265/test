@@ -58,7 +58,7 @@ shipmentRouter.get(
 shipmentRouter.get(
   '/tracking/:trackingNumber',
   asyncHandler(async (req: Request, res: Response) => {
-    const result = await shipmentService.trackShipment(req.params.trackingNumber);
+    const result = await shipmentService.trackShipment(req.params.trackingNumber!);
     res.status(200).json({ data: result });
   }),
 );
@@ -113,7 +113,7 @@ shipmentRouter.get(
   requireAuth,
   asyncHandler(async (req: Request, res: Response) => {
     const isAdmin = req.user!.role === 'admin' || req.user!.role === 'super_admin';
-    const result = await shipmentService.getShipment(req.params.id, req.user!.id, isAdmin);
+    const result = await shipmentService.getShipment(req.params.id!!, req.user!.id, isAdmin);
     res.status(200).json({ data: result });
   }),
 );
@@ -127,7 +127,7 @@ shipmentRouter.get(
   requireAuth,
   asyncHandler(async (req: Request, res: Response) => {
     const result = await shipmentService.getShipmentHistory(
-      req.params.id,
+      req.params.id!,
       req.user!.id,
       req.user!.role,
     );
@@ -145,7 +145,7 @@ shipmentRouter.post(
   requireRole('customer'),
   asyncHandler(async (req: Request, res: Response) => {
     const result = await shipmentService.confirmDelivery(
-      req.params.id,
+      req.params.id!,
       req.user!.id,
       req.ip ?? 'unknown',
     );
@@ -163,7 +163,7 @@ shipmentRouter.patch(
   requireRole('customer'),
   asyncHandler(async (req: Request, res: Response) => {
     const result = await shipmentService.cancelShipment(
-      req.params.id,
+      req.params.id!,
       req.user!.id,
       req.ip ?? 'unknown',
       req.body.reason,
@@ -208,7 +208,7 @@ adminShipmentRouter.get(
   requireAuth,
   requireRole('admin', 'super_admin'),
   asyncHandler(async (req: Request, res: Response) => {
-    const result = await shipmentService.getShipment(req.params.id, req.user!.id, true);
+    const result = await shipmentService.getShipment(req.params.id!, req.user!.id, true);
     res.status(200).json({ data: result });
   }),
 );
@@ -225,7 +225,7 @@ adminShipmentRouter.post(
   asyncHandler(async (req: Request, res: Response) => {
     const { status, notes, rejection_reason } = req.body;
     const result = await shipmentService.adminTransitionShipment(
-      req.params.id,
+      req.params.id!,
       status,
       req.user!.id,
       req.user!.role,

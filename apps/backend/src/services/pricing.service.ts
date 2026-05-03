@@ -118,17 +118,18 @@ export async function loadActivePricingConfig(bypassCache = false): Promise<Pric
     );
   }
 
+  const pricingData = data as any;
   const config: PricingConfig = {
-    id:                     data.id as string,
-    name:                   data.name as string,
-    base_price_mwk:         data.base_price_mwk as number,
-    per_km_rate_mwk:        data.per_km_rate_mwk as number,
-    weight_rate_per_kg_mwk: data.weight_rate_per_kg_mwk as number,
-    fragile_surcharge_mwk:  data.fragile_surcharge_mwk as number,
-    small_multiplier_bp:    data.small_multiplier_bp as number,
-    medium_multiplier_bp:   data.medium_multiplier_bp as number,
-    large_multiplier_bp:    data.large_multiplier_bp as number,
-    effective_from:         data.effective_from as string,
+    id:                     pricingData.id as string,
+    name:                   pricingData.name as string,
+    base_price_mwk:         pricingData.base_price_mwk as number,
+    per_km_rate_mwk:        pricingData.per_km_rate_mwk as number,
+    weight_rate_per_kg_mwk: pricingData.weight_rate_per_kg_mwk as number,
+    fragile_surcharge_mwk:  pricingData.fragile_surcharge_mwk as number,
+    small_multiplier_bp:    pricingData.small_multiplier_bp as number,
+    medium_multiplier_bp:   pricingData.medium_multiplier_bp as number,
+    large_multiplier_bp:    pricingData.large_multiplier_bp as number,
+    effective_from:         pricingData.effective_from as string,
   };
 
   _configCache = { config, cachedAt: now };
