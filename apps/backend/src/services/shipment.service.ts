@@ -44,15 +44,16 @@ import {
   BusinessRuleError,
   mapSupabaseError,
 } from '../errors/app-error.js';
+import { logger } from '../utils/logger.js';
+
 import { auditService } from './audit.service.js';
-import { calculateShipmentPrice } from './pricing.service.js';
 import { calculateDistance } from './geo.service.js';
+import { calculateShipmentPrice } from './pricing.service.js';
 import {
   validateAdminTransition,
   canCustomerCancel,
   type TransitionContext,
 } from './shipment-state-machine.js';
-import { logger } from '../utils/logger.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

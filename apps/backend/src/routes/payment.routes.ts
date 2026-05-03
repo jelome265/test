@@ -21,17 +21,17 @@
  *   on retries. Changing the key on retry creates a new payment record.
  */
 
+import { InitiatePaymentSchema } from '@courier/shared-validation';
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 
-import { InitiatePaymentSchema } from '@courier/shared-validation';
 
 import { requireAuth } from '../middleware/auth.middleware.js';
+import { paymentRateLimit } from '../middleware/rate-limit.middleware.js';
 import { requireRole } from '../middleware/rbac.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
-import { paymentRateLimit } from '../middleware/rate-limit.middleware.js';
-import { asyncHandler } from '../utils/async-handler.js';
 import { paymentService } from '../services/payment.service.js';
+import { asyncHandler } from '../utils/async-handler.js';
 
 export const paymentRouter = Router();
 

@@ -30,9 +30,6 @@
  *   - The refresh_token is returned only once per login/refresh cycle.
  */
 
-import { Router } from 'express';
-import type { Request, Response } from 'express';
-
 import {
   RegisterSchema,
   LoginSchema,
@@ -40,12 +37,15 @@ import {
   UpdateFCMTokenSchema,
   ChangePasswordSchema,
 } from '@courier/shared-validation';
+import { Router } from 'express';
+import type { Request, Response } from 'express';
+
 
 import { requireAuth } from '../middleware/auth.middleware.js';
-import { validate } from '../middleware/validate.middleware.js';
 import { authRateLimit } from '../middleware/rate-limit.middleware.js';
-import { asyncHandler } from '../utils/async-handler.js';
+import { validate } from '../middleware/validate.middleware.js';
 import { authService } from '../services/auth.service.js';
+import { asyncHandler } from '../utils/async-handler.js';
 
 export const authRouter = Router();
 

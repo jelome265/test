@@ -24,6 +24,7 @@
  * we strip the Authorization header from any error logging here.
  */
 
+import type { PaymentMethod } from '@courier/shared-types';
 import axios, {
   type AxiosInstance,
   type AxiosError,
@@ -36,7 +37,6 @@ import {
   BusinessRuleError,
 } from '../errors/app-error.js';
 import { logger } from '../utils/logger.js';
-import type { PaymentMethod } from '@courier/shared-types';
 
 // ─── Paychangu API response shapes ───────────────────────────────────────────
 

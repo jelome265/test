@@ -19,21 +19,21 @@
  *   POST   /shipments/:id/transition → State transition (Admin)
  */
 
-import { Router } from 'express';
-import type { Request, Response } from 'express';
-
+import type { ShipmentStatus } from '@courier/shared-types';
 import {
   CreateShipmentSchema,
   QuoteSchema,
   AdminStatusUpdateSchema,
 } from '@courier/shared-validation';
-import type { ShipmentStatus } from '@courier/shared-types';
+import { Router } from 'express';
+import type { Request, Response } from 'express';
+
 
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { requireRole } from '../middleware/rbac.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
-import { asyncHandler } from '../utils/async-handler.js';
 import { shipmentService } from '../services/shipment.service.js';
+import { asyncHandler } from '../utils/async-handler.js';
 
 // ─── Customer Router ─────────────────────────────────────────────────────────
 export const shipmentRouter = Router();
@@ -113,7 +113,7 @@ shipmentRouter.get(
   requireAuth,
   asyncHandler(async (req: Request, res: Response) => {
     const isAdmin = req.user!.role === 'admin' || req.user!.role === 'super_admin';
-    const result = await shipmentService.getShipment(req.params.id!!, req.user!.id, isAdmin);
+    const result = await shipmentService.getShipment(req.params.id!, req.user!.id, isAdmin);
     res.status(200).json({ data: result });
   }),
 );

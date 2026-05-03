@@ -32,10 +32,10 @@ import { pinoHttp } from 'pino-http';
 import { env, isProd, isTest } from './config/env.js';
 import { notFoundHandler , errorHandler } from './middleware/error.middleware.js';
 import { globalRateLimit } from './middleware/rate-limit.middleware.js';
-import { healthRouter } from './routes/health.routes.js';
 import { authRouter } from './routes/auth.routes.js';
-import { shipmentRouter, adminShipmentRouter } from './routes/shipment.routes.js';
+import { healthRouter } from './routes/health.routes.js';
 import { paymentRouter } from './routes/payment.routes.js';
+import { shipmentRouter, adminShipmentRouter } from './routes/shipment.routes.js';
 import { webhookRouter } from './routes/webhook.routes.js';
 import { logger } from './utils/logger.js';
 

@@ -26,7 +26,6 @@
  * It never throws — all failures fall back gracefully.
  */
 
-import axios from 'axios';
 import {
   CITY_CENTERS,
   INTER_CITY_DISTANCES_KM,
@@ -34,6 +33,7 @@ import {
   SUPPORTED_CITIES,
 } from '@courier/shared-constants';
 import type { SupportedCity, GeoPoint } from '@courier/shared-types';
+import axios from 'axios';
 
 import { env, isTest } from '../config/env.js';
 import { logger } from '../utils/logger.js';

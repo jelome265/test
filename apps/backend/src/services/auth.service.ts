@@ -45,8 +45,9 @@ import {
   ExternalServiceError,
   NotFoundError,
 } from '../errors/app-error.js';
-import { auditService } from './audit.service.js';
 import { logger } from '../utils/logger.js';
+
+import { auditService } from './audit.service.js';
 
 // ─── Response types ───────────────────────────────────────────────────────────
 
