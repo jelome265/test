@@ -34,6 +34,7 @@ import { notFoundHandler , errorHandler } from './middleware/error.middleware.js
 import { globalRateLimit } from './middleware/rate-limit.middleware.js';
 import { healthRouter } from './routes/health.routes.js';
 import { authRouter } from './routes/auth.routes.js';
+import { shipmentRouter, adminShipmentRouter } from './routes/shipment.routes.js';
 import { logger } from './utils/logger.js';
 
 // ─── Sentry initialization ────────────────────────────────────────────────────
@@ -154,8 +155,9 @@ export function createApp(): Express {
   // Mount health routes first — they have no auth and must respond fast
   v1Router.use('/health', healthRouter);
   v1Router.use('/auth',   authRouter);
+  v1Router.use('/shipments', shipmentRouter);
+  v1Router.use('/admin',     adminShipmentRouter);
 
-  // Phase 5: v1Router.use('/shipments',     shipmentRouter);
   // Phase 6: v1Router.use('/payments',      paymentRouter);
   // Phase 7: v1Router.use('/notifications', notificationRouter);
   // Phase 8: v1Router.use('/admin',         adminRouter);
