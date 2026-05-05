@@ -51,6 +51,7 @@ import {
 import { logger } from '../utils/logger.js';
 
 import { auditService } from './audit.service.js';
+import { notificationService } from './notification.service.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -393,7 +394,7 @@ class PaymentService {
     // Look up the payment by our provider_reference
     const { data: existingPayment } = await supabaseServiceRole()
       .from('payments')
-      .select('id, status, amount_mwk, shipment_id')
+      .select('id, status, amount_mwk, shipment_id, user_id')
       .eq('provider_reference', tx_ref)
       .single();
 
@@ -433,6 +434,11 @@ class PaymentService {
           p_actor_ip:           actorIp,
         },
       );
+
+      notificationService.notifyPaymentFailed(
+        existingPayment.shipment_id as string,
+        existingPayment.user_id as string,
+      ).catch((err: Error) => logger.error({ err, txRef: tx_ref }, 'notifyPaymentFailed failed'));
 
       return {
         action:     'reverted',
@@ -479,6 +485,11 @@ class PaymentService {
         'Payment confirmed — shipment advanced to payment_confirmed',
       );
 
+      notificationService.notifyPaymentConfirmed(
+        existingPayment.shipment_id as string,
+        existingPayment.user_id as string,
+      ).catch((err: Error) => logger.error({ err, txRef: tx_ref }, 'notifyPaymentConfirmed failed'));
+
       return { action: 'advanced', payment_id: paymentId, status: 'paid' };
 
     } else {
@@ -508,6 +519,11 @@ class PaymentService {
         { txRef: tx_ref, paymentId, status },
         'Payment failed — shipment reverted to approved',
       );
+
+      notificationService.notifyPaymentFailed(
+        existingPayment.shipment_id as string,
+        existingPayment.user_id as string,
+      ).catch((err: Error) => logger.error({ err, txRef: tx_ref }, 'notifyPaymentFailed failed'));
 
       return {
         action:     'reverted',

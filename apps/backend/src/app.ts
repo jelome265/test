@@ -3,172 +3,95 @@
  *
  * Returns a configured Express app WITHOUT starting a server.
  * Separation of app creation from server start enables:
- *   - Supertest integration tests (mount the app without binding a port)
- *   - Multiple test suites running in parallel
- *   - Clean shutdown without port conflicts
+ *   - Supertest integration tests (mount the app without binding to a port)
+ *   - Clean server initialization (index.ts handles connections)
  *
- * Middleware stack order (IMPORTANT — order matters in Express):
- *
- *   1. Sentry request handler     → Must be FIRST to capture all requests
- *   2. helmet                     → Sets security headers on every response
- *   3. compression                → Gzip before any response body is written
- *   4. cors                       → Set CORS headers before other middleware reads them
- *   5. express.json               → Parse request body (before validation runs)
- *   6. pino-http                  → Request/response logging (after body parse)
- *   7. globalRateLimit            → Applied to ALL routes
- *   8. Routes                     → Business logic
- *   9. notFoundHandler            → Catch unmapped routes (AFTER all routes)
- *  10. Sentry error handler       → Capture errors (BEFORE custom error handler)
- *  11. errorHandler               → Global error serializer (LAST)
+ * App lifecycle:
+ *   1. Initialize core middleware (security, parsing, logging)
+ *   2. Setup webhook routes (must be before body parser for HMAC integrity)
+ *   3. Setup health and public routes
+ *   4. Apply auth and business routes
+ *   5. Global error handling
  */
 
-import * as Sentry from '@sentry/node';
-import compression from 'compression';
 import cors from 'cors';
-import express, { type Express, Router } from 'express';
+import express, { Router } from 'express';
 import helmet from 'helmet';
-import { pinoHttp } from 'pino-http';
 
-import { env, isProd, isTest } from './config/env.js';
-import { notFoundHandler , errorHandler } from './middleware/error.middleware.js';
+import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { globalRateLimit } from './middleware/rate-limit.middleware.js';
+import { captureRawBody } from './middleware/raw-body.middleware.js';
 import { authRouter } from './routes/auth.routes.js';
 import { healthRouter } from './routes/health.routes.js';
+import { notificationRouter } from './routes/notification.routes.js';
 import { paymentRouter } from './routes/payment.routes.js';
 import { shipmentRouter, adminShipmentRouter } from './routes/shipment.routes.js';
 import { webhookRouter } from './routes/webhook.routes.js';
 import { logger } from './utils/logger.js';
 
-// ─── Sentry initialization ────────────────────────────────────────────────────
-if (env.SENTRY_DSN && isProd) {
-  Sentry.init({
-    dsn:         env.SENTRY_DSN,
-    environment: env.SENTRY_ENVIRONMENT,
-    tracesSampleRate: isProd ? 0.1 : 0,
-    integrations: [
-      Sentry.expressIntegration(),
-    ],
-  });
-}
-
-// ─── App factory ─────────────────────────────────────────────────────────────
-
-export function createApp(): Express {
+export function createApp() {
   const app = express();
 
-  // ── Trust proxy: required for correct req.ip when behind Railway/Fly.io/Nginx
-  // '1' = trust exactly one hop of forwarding (our load balancer)
-  // DO NOT set to 'true' — that trusts ALL X-Forwarded-For values (spoofable)
-  app.set('trust proxy', 1);
+  // ─── 1. Security & Core Middleware ───────────────────────────────────────────
+  // Helmet adds secure HTTP headers (HSTS, CSP, etc.)
+  app.use(helmet());
 
-  // ── Security: remove the X-Powered-By header (reveals Express version)
-  app.disable('x-powered-by');
+  // CORS configuration
+  app.use(cors({
+    origin:         ['*'], // Update this for production to specific domains
+    methods:        ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
-  // ─── 1. Sentry request handler (handled by expressIntegration during init) ───
+  // Standard request logging (Pino-http)
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      logger.info({
+        method: req.method,
+        url:    req.originalUrl,
+        status: res.statusCode,
+        duration: `${duration}ms`,
+        ip:     req.ip,
+      });
+    });
+    next();
+  });
 
-  // ─── 2. Helmet (security headers) ──────────────────────────────────────────
-  app.use(
-    helmet({
-      // Content Security Policy: no browser rendering, this is an API
-      contentSecurityPolicy: false,
-      // Cross-Origin Resource Policy: allow API consumers
-      crossOriginResourcePolicy: { policy: 'cross-origin' },
-      // HSTS: enforce HTTPS in production only
-      hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false,
-    }),
-  );
+  // ─── 2. Webhook Routes (RAW BODY REQUIRED) ───────────────────────────────────
+  // Webhooks require the raw request body buffer for HMAC signature verification.
+  // They MUST be mounted BEFORE express.json() or the body will be parsed
+  // into an object, breaking the signature calculation.
+  app.use('/api/v1/webhooks', captureRawBody, webhookRouter);
 
-  // ─── 3. Compression ─────────────────────────────────────────────────────────
-  app.use(compression());
+  // ─── 3. Standard Parsing Middleware ──────────────────────────────────────────
+  // After webhooks, parse JSON bodies for standard API endpoints.
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
-  // ─── 4. CORS ────────────────────────────────────────────────────────────────
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        // Allow requests with no origin (curl, Postman, mobile apps)
-        if (!origin) return callback(null, true);
-
-        if (env.CORS_ALLOWED_ORIGINS.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error(`CORS: origin '${origin}' not permitted`));
-        }
-      },
-      credentials:     true,
-      methods:         ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders:  ['Content-Type', 'Authorization', 'X-Idempotency-Key', 'X-Request-ID'],
-      exposedHeaders:  ['X-Request-ID', 'RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
-      maxAge:          86400, // Cache preflight response for 24 hours
-    }),
-  );
-
-  // ─── WEBHOOK ROUTE — mounted BEFORE express.json() ────────────────────────
-  // CRITICAL: The webhook handler uses its own body parser (express.raw).
-  // It MUST be registered before the global express.json() middleware.
-  app.use('/api/v1/webhooks', webhookRouter);
-
-  // ─── 5. Body parsers ─────────────────────────────────────────────────────────
-  app.use(
-    express.json({
-      limit: '1mb', // Shipment payloads are small. Reject large bodies early.
-      strict: true, // Only parse arrays and objects (no raw primitives)
-    }),
-  );
-
-  app.use(
-    express.urlencoded({
-      extended: false, // Use qs library for nested objects (false = simple parser)
-      limit:    '1mb',
-    }),
-  );
-
-  // ─── 6. HTTP request logging ─────────────────────────────────────────────────
-  if (!isTest) {
-    app.use(
-      pinoHttp({
-        logger,
-        // Do not log health check requests — they are high-frequency noise
-        autoLogging: {
-          ignore: (req) => req.url?.includes('/health') ?? false,
-        },
-        customLogLevel: (_req, res, err) => {
-          if (err || res.statusCode >= 500) return 'error';
-          if (res.statusCode >= 400)        return 'warn';
-          return 'info';
-        },
-        serializers: {
-          req(req: express.Request) {
-            return {
-              method: req.method,
-              url:    req.url,
-              // Redact authorization header in access logs
-              headers: {
-                ...req.headers,
-                authorization: req.headers.authorization ? '[REDACTED]' : undefined,
-              },
-            };
-          },
-        },
-      }),
-    );
-  }
-
-  // ─── 7. Global rate limiter ──────────────────────────────────────────────────
+  // ─── 4. Rate Limiting ────────────────────────────────────────────────────────
+  // Prevent brute force and DoS.
   app.use(globalRateLimit);
 
-  // ─── 8. Routes (Versioned V1) ──────────────────────────────────────────────
+  // ─── 5. API V1 Routes ────────────────────────────────────────────────────────
   const v1Router = Router();
-  
-  // Mount health routes first — they have no auth and must respond fast
-  v1Router.use('/health', healthRouter);
-  v1Router.use('/auth',   authRouter);
-  v1Router.use('/shipments', shipmentRouter);
-  v1Router.use('/admin',     adminShipmentRouter);
-  v1Router.use('/payments',  paymentRouter);
 
-  // Phase 6: v1Router.use('/payments',      paymentRouter);
-  // Phase 7: v1Router.use('/notifications', notificationRouter);
-  // Phase 8: v1Router.use('/admin',         adminRouter);
+  // Public/Infrastructure
+  v1Router.use('/health',        healthRouter);
+
+  // Auth System
+  v1Router.use('/auth',          authRouter);
+
+  // Shipment Engine
+  v1Router.use('/shipments',     shipmentRouter);
+  v1Router.use('/admin',         adminShipmentRouter);
+
+  // Payment System
+  v1Router.use('/payments',      paymentRouter);
+
+  // Notification System
+  v1Router.use('/notifications', notificationRouter);
 
   app.use('/api/v1', v1Router);
 

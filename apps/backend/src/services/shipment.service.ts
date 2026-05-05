@@ -48,6 +48,7 @@ import { logger } from '../utils/logger.js';
 
 import { auditService } from './audit.service.js';
 import { calculateDistance } from './geo.service.js';
+import { notificationService } from './notification.service.js';
 import { calculateShipmentPrice } from './pricing.service.js';
 import {
   validateAdminTransition,
@@ -324,6 +325,17 @@ class ShipmentService {
       'Shipment created',
     );
 
+    // Fire-and-forget: notification errors must NEVER fail the shipment creation.
+    notificationService.notifyShipmentCreated(shipment.id as string, userId)
+      .catch((err: Error) => logger.error({ err, shipmentId: shipment.id }, 'notifyShipmentCreated failed'));
+
+    notificationService.notifyAdminsNewShipment(
+      shipment.id as string,
+      shipment.tracking_number as string,
+      sender.city,
+      receiver.city,
+    ).catch((err: Error) => logger.error({ err, shipmentId: shipment.id }, 'notifyAdminsNewShipment failed'));
+
     return { shipment: shipment as unknown as Shipment };
   }
 
@@ -558,6 +570,9 @@ class ShipmentService {
 
     logger.info({ shipmentId, actorId }, 'Delivery confirmed by customer');
 
+    notificationService.notifyShipmentStatusChanged(shipmentId, 'confirmed')
+      .catch((err: Error) => logger.error({ err, shipmentId }, 'notifyShipmentStatusChanged (confirmed) failed'));
+
     return data as unknown as Shipment;
   }
 
@@ -671,6 +686,9 @@ class ShipmentService {
       { shipmentId, from: current.status, to: targetStatus, actorId, actorRole },
       'Admin transitioned shipment status',
     );
+
+    notificationService.notifyShipmentStatusChanged(shipmentId, targetStatus)
+      .catch((err: Error) => logger.error({ err, shipmentId, targetStatus }, 'notifyShipmentStatusChanged failed'));
 
     return data as unknown as Shipment;
   }

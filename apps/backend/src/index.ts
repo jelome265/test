@@ -34,7 +34,10 @@ import { env }        from './config/env.js';
 import { getFirebaseApp }       from './config/firebase.js';
 import { getRedis, closeRedis } from './config/redis.js';
 import { supabaseServiceRole }  from './config/supabase.js';
+import { scheduleExpiryJob }  from './queues/expiry.queue.js';
 import { logger }               from './utils/logger.js';
+import { ExpiryWorker }       from './workers/expiry.worker.js';
+import { NotificationWorker } from './workers/notification.worker.js';
 
 const SHUTDOWN_TIMEOUT_MS = 30_000;
 
@@ -75,6 +78,17 @@ async function bootstrap(): Promise<void> {
   logger.info('Initializing Firebase Admin SDK...');
   getFirebaseApp();
   logger.info('Firebase Admin SDK initialized');
+
+  // ── Initialize background workers ──────────────────────────────────────────
+  logger.info('Starting background workers...');
+
+  const notificationWorker = new NotificationWorker();
+  const expiryWorker       = new ExpiryWorker();
+
+  // Schedule the payment expiry recurring job (idempotent on restart)
+  await scheduleExpiryJob();
+
+  logger.info('Background workers started');
 
   // ── Create and start the HTTP server
   const app    = createApp();
@@ -123,7 +137,14 @@ async function bootstrap(): Promise<void> {
         });
       });
 
-      // Step 2: Close Redis (waits for in-flight BullMQ operations)
+      // Step 2: Close workers (wait for in-flight jobs — drain)
+      await Promise.all([
+        notificationWorker.close(),
+        expiryWorker.close(),
+      ]);
+      logger.info('Workers closed');
+
+      // Step 3: Close Redis
       await closeRedis();
 
       clearTimeout(forceKill);

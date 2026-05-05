@@ -1,0 +1,218 @@
+{
+  "main": {
+    "id": "ba12da614dd3ebac",
+    "type": "split",
+    "children": [
+      {
+        "id": "76f8e751da62848d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d088faa123fa5193",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "2976c4866cf2d541",
+    "type": "split",
+    "children": [
+      {
+        "id": "f7125530152b6b87",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6273ef0bce0162d4",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "990a3e8259855509",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:architecture",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "aad3087f2b17c8a6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "df4b1f50bff09dfd",
+    "type": "split",
+    "children": [
+      {
+        "id": "71cde37dbcc35bbe",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "30c2d50d938f3ec0",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "c571a1ab35e70483",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "b1571bed1e5692b1",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "2b9a22d3ffa49917",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "c48dcf73bab36ea0",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "d088faa123fa5193",
+  "lastOpenFiles": [
+    "vault/Bug_Template.md",
+    "vault/Testing_Architecture.md",
+    "vault/supabase/migrations/011_pricing_config.sql.md",
+    "vault/supabase/migrations/006_shipments.sql.md",
+    "vault/root/package.json.md",
+    "vault/apps/backend/src/clients/paychangu.client.ts.md",
+    "vault/apps/backend/src/errors/app-error.ts.md",
+    "vault/apps/backend/src/utils/webhook-verification.ts.md",
+    "vault/apps/backend/src/utils/logger.ts.md",
+    "vault/apps/backend/src/middleware/validate.middleware.ts.md",
+    "vault/apps/backend/src/middleware/rbac.middleware.ts.md",
+    "vault/apps/backend/src/middleware/auth.middleware.ts.md",
+    "vault/apps/backend/src/middleware/error.middleware.ts.md",
+    "vault/apps/backend/src/services/auth.service.ts.md",
+    "vault/apps/backend/src/index.ts.md",
+    "vault/apps/backend/src/config/supabase.ts.md",
+    "vault/apps/backend/src/app.ts.md",
+    "vault/supabase/migrations/016_payment_rpcs.sql.md",
+    "vault/apps/backend/src/config/env.ts.md",
+    "vault/apps/backend/src/routes/webhook.routes.ts.md",
+    "vault/packages/shared-validation/src/shipment.schemas.ts.md",
+    "vault/packages/shared-types/src/shipment.types.ts.md",
+    "vault/packages/shared-constants/src/status.ts.md",
+    "vault/packages/shared-constants/src/regions.ts.md",
+    "vault/packages/shared-constants/src/limits.ts.md",
+    "vault/apps/backend/src/routes/shipment.routes.ts.md",
+    "vault/root",
+    "vault/supabase/migrations",
+    "vault/supabase",
+    "vault/packages/shared-validation/src",
+    "vault/packages/shared-types/src",
+    "vault/packages/shared-constants/src",
+    "vault/packages/shared-validation",
+    "vault/packages/shared-types",
+    "vault/packages/shared-constants",
+    "vault/packages"
+  ]
+}
