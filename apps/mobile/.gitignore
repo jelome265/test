@@ -1,0 +1,14 @@
+node_modules/
+.expo/
+dist/
+build/
+web-build/
+.turbo/
+*.tsbuildinfo
+.env
+.env.*
+coverage/
+ios/
+android/
+google-services.json
+GoogleService-Info.plist
