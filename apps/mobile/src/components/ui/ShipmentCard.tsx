@@ -1,6 +1,5 @@
 // src/components/ui/ShipmentCard.tsx
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Shipment } from '@courier/shared-types';

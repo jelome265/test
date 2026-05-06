@@ -37,11 +37,13 @@ vi.mock('../../src/config/redis.js', () => ({
 
 // Mock BullMQ Worker to avoid actual Redis connections
 vi.mock('bullmq', () => ({
-  Worker: vi.fn().mockImplementation(() => ({
-    on:      vi.fn(),
-    close:   vi.fn().mockResolvedValue(undefined),
-    closing: false,
-  })),
+  Worker: vi.fn().mockImplementation(function () {
+    return {
+      on:      vi.fn(),
+      close:   vi.fn().mockResolvedValue(undefined),
+      closing: false,
+    };
+  }),
 }));
 
 import { NotificationWorker } from '../../src/workers/notification.worker.js';

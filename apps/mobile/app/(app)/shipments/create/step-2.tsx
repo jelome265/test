@@ -1,6 +1,5 @@
 // app/(app)/shipments/create/step-2.tsx
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 

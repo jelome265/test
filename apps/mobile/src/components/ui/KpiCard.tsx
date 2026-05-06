@@ -4,7 +4,6 @@
  * Shows: label, primary value, optional secondary label, optional trend indicator.
  */
 
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, spacing, typography, radius } from '../../theme';

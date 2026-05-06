@@ -18,11 +18,13 @@ vi.mock('../../src/config/redis.js', () => ({
 }));
 
 vi.mock('bullmq', () => ({
-  Worker: vi.fn().mockImplementation(() => ({
-    on:      vi.fn(),
-    close:   vi.fn().mockResolvedValue(undefined),
-    closing: false,
-  })),
+  Worker: vi.fn().mockImplementation(function () {
+    return {
+      on:      vi.fn(),
+      close:   vi.fn().mockResolvedValue(undefined),
+      closing: false,
+    };
+  }),
 }));
 
 import { ExpiryWorker } from '../../src/workers/expiry.worker.js';

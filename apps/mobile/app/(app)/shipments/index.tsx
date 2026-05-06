@@ -1,6 +1,6 @@
 // app/(app)/shipments/index.tsx
 import { useRouter } from 'expo-router';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   FlatList,
   RefreshControl,

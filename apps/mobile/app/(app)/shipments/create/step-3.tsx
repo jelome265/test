@@ -1,6 +1,6 @@
 // app/(app)/shipments/create/step-3.tsx
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { tambalaToMwk } from '@courier/shared-constants';

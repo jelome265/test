@@ -1,6 +1,6 @@
 // app/(auth)/login.tsx
 import { Link } from 'expo-router';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import {
   ScrollView,
   StyleSheet,

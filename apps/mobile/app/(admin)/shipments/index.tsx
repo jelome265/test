@@ -1,5 +1,5 @@
 // app/(admin)/shipments/index.tsx
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   FlatList,
   RefreshControl,

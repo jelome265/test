@@ -9,10 +9,10 @@
     "start:prod": "node dist/index.js",
     "lint": "eslint . --ext .ts --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:e2e": "NODE_ENV=test dotenv -e .env.test -- vitest run test/e2e/**/*.e2e.test.ts",
+    "test": "vitest --configLoader native --pool threads --maxWorkers 1 run --passWithNoTests",
+    "test:watch": "vitest --configLoader native --pool threads --maxWorkers 1",
+    "test:coverage": "vitest --configLoader native --pool threads --maxWorkers 1 run --coverage",
+    "test:e2e": "node ./scripts/run-vitest-e2e.mjs",
     "clean": "rm -rf dist"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 // app/(auth)/register.tsx
 import { Link } from 'expo-router';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

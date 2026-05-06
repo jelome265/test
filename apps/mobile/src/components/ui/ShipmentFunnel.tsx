@@ -5,7 +5,7 @@
  * Uses pure RN View layout — no chart library dependency.
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { STATUS_LABELS } from '@courier/shared-constants';

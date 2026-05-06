@@ -1,5 +1,7 @@
+const reactNativePreset = require('./node_modules/react-native/jest-preset');
+
 module.exports = {
-  preset: 'jest-expo',
+  ...reactNativePreset,
   setupFilesAfterEnv: ['@testing-library/react-native/extend-expect'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transformIgnorePatterns: [

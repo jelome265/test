@@ -1,6 +1,5 @@
 // app/(app)/profile/index.tsx
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button }           from '../../../src/components/ui/Button';

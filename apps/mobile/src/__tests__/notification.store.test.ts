@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+
+jest.mock('../api/notifications', () => ({
+  notificationsApi: {
+    getUnreadCount: jest.fn().mockResolvedValue(0),
+  },
+}));
+
 import { useNotificationStore } from '../stores/notification.store';
 
 describe('useNotificationStore', () => {

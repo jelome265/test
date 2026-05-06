@@ -1,6 +1,5 @@
 // app/(app)/shipments/track/[trackingNumber].tsx
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button }       from '../../../../src/components/ui/Button';

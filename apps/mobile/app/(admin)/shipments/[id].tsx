@@ -1,6 +1,6 @@
 // app/(admin)/shipments/[id].tsx
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   ScrollView,

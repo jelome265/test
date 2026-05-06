@@ -8,6 +8,7 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Mock expo-secure-store
 jest.mock('expo-secure-store', () => ({
+  WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'when-unlocked-this-device-only',
   setItemAsync:    jest.fn().mockImplementation(() => Promise.resolve()),
   getItemAsync:    jest.fn().mockImplementation(() => Promise.resolve(null)),
   deleteItemAsync: jest.fn().mockImplementation(() => Promise.resolve()),
@@ -55,8 +56,12 @@ describe('useAuthStore', () => {
     expect(state.isAuthenticated).toBe(true);
     expect(state.user?.id).toBe('uuid-1');
     expect(state.accessToken).toBe('at1');
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('access_token', 'at1');
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('refresh_token', 'rt1');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('access_token', 'at1', {
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    });
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('refresh_token', 'rt1', {
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    });
   });
 
   it('logout() calls authApi.logout and clears state', async () => {

@@ -1,5 +1,4 @@
 // src/components/ui/StatusBadge.tsx
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { STATUS_LABELS } from '@courier/shared-constants';

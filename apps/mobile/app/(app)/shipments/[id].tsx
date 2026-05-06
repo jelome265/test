@@ -1,6 +1,5 @@
 // app/(app)/shipments/[id].tsx
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
 import {
   Alert,
   RefreshControl,

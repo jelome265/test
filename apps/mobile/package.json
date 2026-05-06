@@ -13,7 +13,7 @@
     "submit:android": "eas submit --platform android --profile production",
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests"
+    "test": "jest --runInBand --passWithNoTests"
   },
   "dependencies": {
     "@courier/shared-constants": "*",
@@ -54,6 +54,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.9",
+    "@babel/preset-flow": "^7.27.1",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@jest/globals": "^29.7.0",
     "@testing-library/react-native": "^12.5.1",
     "@types/react": "~18.2.79",
