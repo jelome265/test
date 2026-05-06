@@ -6,6 +6,8 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
     "paths": {
       "@courier/shared-types": ["../../packages/shared-types/src/index.ts"],
       "@courier/shared-validation": ["../../packages/shared-validation/src/index.ts"],

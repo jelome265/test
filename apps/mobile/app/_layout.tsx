@@ -14,7 +14,7 @@ initMobileSentry();
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, router, usePathname } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import Toast from 'react-native-toast-message';
 

@@ -2,7 +2,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Tabs } from 'expo-router';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
 import { colors, typography } from '../../src/theme';

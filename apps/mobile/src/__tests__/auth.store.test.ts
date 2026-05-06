@@ -8,18 +8,18 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Mock expo-secure-store
 jest.mock('expo-secure-store', () => ({
-  setItemAsync: jest.fn().mockResolvedValue(undefined),
-  getItemAsync: jest.fn().mockResolvedValue(null),
-  deleteItemAsync: jest.fn().mockResolvedValue(undefined),
+  setItemAsync:    jest.fn().mockImplementation(() => Promise.resolve()),
+  getItemAsync:    jest.fn().mockImplementation(() => Promise.resolve(null)),
+  deleteItemAsync: jest.fn().mockImplementation(() => Promise.resolve()),
 }));
 
 // Mock authApi
 jest.mock('../api/auth', () => ({
   authApi: {
-    logout:                  jest.fn().mockResolvedValue(undefined),
+    logout:                  jest.fn().mockImplementation(() => Promise.resolve()),
     getProfile:              jest.fn(),
     refreshViaRefreshToken:  jest.fn(),
-    updateFcmToken:          jest.fn().mockResolvedValue(undefined),
+    updateFcmToken:          jest.fn().mockImplementation(() => Promise.resolve()),
   },
 }));
 

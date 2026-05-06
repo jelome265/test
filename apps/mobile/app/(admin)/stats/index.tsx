@@ -11,7 +11,6 @@
  *   5. Open disputes indicator
  */
 
-import React from 'react';
 import {
   RefreshControl,
   ScrollView,

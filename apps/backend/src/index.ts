@@ -121,13 +121,15 @@ async function bootstrap(): Promise<void> {
     logger.info({ signal }, 'Shutdown signal received — starting graceful shutdown');
 
     // Force-kill if shutdown takes too long
-    const forceKill = setTimeout(() => {
+    const forceKill: any = setTimeout(() => {
       logger.error('Graceful shutdown timed out — forcing exit');
       process.exit(1);
     }, SHUTDOWN_TIMEOUT_MS);
 
     // Allow the timeout to be garbage-collected if shutdown completes in time
-    forceKill.unref();
+    if (forceKill?.unref) {
+      forceKill.unref();
+    }
 
     try {
       // Step 1: Stop accepting new connections
