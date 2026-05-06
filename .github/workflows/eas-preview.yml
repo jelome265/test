@@ -1,0 +1,52 @@
+# .github/workflows/eas-preview.yml
+#
+# Builds a preview APK on every PR that touches mobile code.
+# Installs directly on Android test devices via EAS internal distribution.
+#
+# Required secrets:
+#   EXPO_TOKEN — EAS access token from expo.dev
+
+name: EAS Preview Build
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/**'
+
+jobs:
+  build-preview:
+    name: EAS Android Preview Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version:  latest
+          token:        ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build preview APK
+        working-directory: apps/mobile
+        run: |
+          eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

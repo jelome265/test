@@ -1,6 +1,6 @@
 {
   "name": "@courier/backend",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,27 +12,33 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "NODE_ENV=test dotenv -e .env.test -- vitest run test/e2e/**/*.e2e.test.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@courier/shared-constants": "*",
     "@courier/shared-types": "*",
     "@courier/shared-validation": "*",
-    "@courier/shared-constants": "*",
-    "@sentry/node": "^8.13.0",
+    "@sentry/node": "^10.51.0",
+    "@sentry/profiling-node": "^10.51.0",
+    "@sentry/react-native": "5.36.0",
     "@supabase/supabase-js": "^2.43.5",
     "axios": "^1.7.2",
     "bullmq": "^5.10.2",
-    "compression": "^1.7.4",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
+    "expo": "55.0.23",
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.1",
-    "firebase-admin": "^12.2.0",
+    "firebase-admin": "^10.3.0",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
     "morgan": "^1.10.0",
     "pino": "^9.2.0",
     "pino-http": "^10.2.0",
     "pino-pretty": "^11.2.1",
+    "rate-limit-redis": "^4.3.1",
+    "react-native": "0.85.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -41,11 +47,11 @@
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.14.9",
-    "@vitest/coverage-v8": "^1.6.0",
-    "supertest": "^7.0.0",
     "@types/supertest": "^6.0.2",
+    "@vitest/coverage-v8": "^4.1.5",
+    "supertest": "^7.0.0",
     "tsx": "^4.16.0",
     "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
+    "vitest": "^4.1.5"
   }
 }

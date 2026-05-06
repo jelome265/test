@@ -9,6 +9,9 @@
  *   - authenticated + admin    → /(admin)/shipments
  */
 
+import { initMobileSentry } from '../src/lib/sentry';
+initMobileSentry();
+
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, router, usePathname } from 'expo-router';
 import React, { useEffect } from 'react';
@@ -23,10 +26,14 @@ import {
 }                                    from '../src/lib/notifications';
 import { useAuthStore }              from '../src/stores/auth.store';
 import { useNotificationStore }      from '../src/stores/notification.store';
+import { usePendingLinkStore }       from '../src/stores/pending-link.store';
+import { OfflineBanner }             from '../src/components/ui/OfflineBanner';
+import { AppErrorBoundary }          from '../src/components/layout/AppErrorBoundary';
 
 function AuthGate() {
   const { isAuthenticated, isInitializing, user, _initialize } = useAuthStore();
   const refreshUnreadCount = useNotificationStore((s) => s.refreshUnreadCount);
+  const { pendingLink, clearPendingLink } = usePendingLinkStore();
   const pathname = usePathname();
 
   // ── Initialize on mount ────────────────────────────────────────────────────
@@ -83,6 +90,21 @@ function AuthGate() {
     }
   }, [isAuthenticated, isInitializing, pathname, user?.role]);
 
+  // ── Deep link consumption ────────────────────────────────────────────────
+  useEffect(() => {
+    if (isInitializing || !isAuthenticated || !pendingLink) return;
+
+    // Auth ready — navigate to queued deep link and clear
+    clearPendingLink();
+    setTimeout(() => {
+      try {
+        router.push(pendingLink as any);
+      } catch {
+        // Link may be invalid (e.g. admin link for customer) — swallow
+      }
+    }, 300); // Brief delay for navigation stack to settle
+  }, [isInitializing, isAuthenticated, pendingLink]);
+
   // ── Notification tap handler ─────────────────────────────────────────────
   useEffect(() => {
     return addNotificationResponseListener();
@@ -93,14 +115,17 @@ function AuthGate() {
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthGate />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)"  />
-        <Stack.Screen name="(app)"   />
-        <Stack.Screen name="(admin)" />
-      </Stack>
-      <Toast />
-    </QueryClientProvider>
+    <AppErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <OfflineBanner />
+        <AuthGate />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)"  />
+          <Stack.Screen name="(app)"   />
+          <Stack.Screen name="(admin)" />
+        </Stack>
+        <Toast />
+      </QueryClientProvider>
+    </AppErrorBoundary>
   );
 }

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { useNotificationStore } from '../stores/notification.store';
 
 describe('useNotificationStore', () => {

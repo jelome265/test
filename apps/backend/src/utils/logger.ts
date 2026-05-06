@@ -48,6 +48,15 @@ const REDACTED_PATHS = [
   // FCM tokens (PII — tied to device identity)
   'body.fcm_token',
   'fcm_token',
+
+  // ── Phase 9 PII expansion ──────────────────────────────────────
+  // Phone numbers and precise addresses are PII
+  'body.sender.phone_number',
+  'body.receiver.phone_number',
+  'body.sender.address',
+  'body.receiver.address',
+  'shipment.sender_phone',
+  'shipment.receiver_phone',
 ];
 
 // ─── Logger factory ───────────────────────────────────────────────────────────

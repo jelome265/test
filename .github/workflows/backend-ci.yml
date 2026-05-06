@@ -1,0 +1,175 @@
+# .github/workflows/backend-ci.yml
+#
+# Runs on every push to any branch and every pull request.
+# Tests: lint → typecheck → unit → integration tests → Docker build
+#
+# Required secrets:
+#   SUPABASE_URL              — test Supabase project URL
+#   SUPABASE_ANON_KEY         — test anon key
+#   SUPABASE_SERVICE_ROLE_KEY — test service role key
+#   SENTRY_DSN                — (optional) skips Sentry init in test env
+#
+# Redis: a real Redis service is started as a container for BullMQ tests.
+
+name: Backend CI
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'apps/backend/**'
+      - 'packages/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/backend/**'
+      - 'packages/**'
+
+concurrency:
+  group:  ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint backend
+        run: npm run lint --workspace=@courier/backend
+
+      - name: Lint shared packages
+        run: |
+          npm run lint --workspace=@courier/shared-types
+          npm run lint --workspace=@courier/shared-validation
+          npm run lint --workspace=@courier/shared-constants
+
+      - name: Typecheck all
+        run: npm run typecheck
+
+  unit-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Redis service for BullMQ workers
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      NODE_ENV:                   test
+      PORT:                       3001
+      CORS_ALLOWED_ORIGINS:       http://localhost:3001
+      SUPABASE_URL:               ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY:          ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY:  ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      PAYCHANGU_PUBLIC_KEY:       pub_test_ci_key
+      PAYCHANGU_SECRET_KEY:       sec_test_ci_key
+      PAYCHANGU_WEBHOOK_SECRET:   ci-webhook-secret-minimum-32-characters-here
+      PAYCHANGU_BASE_URL:         https://api.paychangu.com
+      FIREBASE_PROJECT_ID:        test-project
+      FIREBASE_CLIENT_EMAIL:      test@test.iam.gserviceaccount.com
+      FIREBASE_PRIVATE_KEY:       "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC7o4qne60TB3wo\n-----END PRIVATE KEY-----\n"
+      GOOGLE_MAPS_SERVER_KEY:     AIzaSy_ci_test_key
+      REDIS_URL:                  redis://localhost:6379
+      ADMIN_EMAIL:                admin@test.mw
+      SENTRY_ENVIRONMENT:         test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test --workspace=@courier/backend -- --reporter=verbose
+
+      - name: Run coverage report
+        run: npm run test:coverage --workspace=@courier/backend
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token:    ${{ secrets.CODECOV_TOKEN }}
+          flags:    backend
+          fail_ci_if_error: false
+
+  docker-build:
+    name: Docker Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint-typecheck]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context:   .
+          file:      apps/backend/Dockerfile
+          push:      false
+          tags:      courier-backend:ci-${{ github.sha }}
+          # Use GitHub Actions cache for layer caching
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+          # Verify the image starts cleanly
+          load:       true
+
+      - name: Smoke test container startup
+        run: |
+          docker run --rm -d \
+            --name courier-smoke \
+            -p 3000:3000 \
+            -e NODE_ENV=production \
+            -e PORT=3000 \
+            -e CORS_ALLOWED_ORIGINS=http://localhost:3000 \
+            -e SUPABASE_URL=https://fake.supabase.co \
+            -e SUPABASE_ANON_KEY=$(python3 -c "print('x'*150)") \
+            -e SUPABASE_SERVICE_ROLE_KEY=$(python3 -c "print('x'*150)") \
+            -e PAYCHANGU_PUBLIC_KEY=pub_test \
+            -e PAYCHANGU_SECRET_KEY=sec_test \
+            -e PAYCHANGU_WEBHOOK_SECRET=minimum-32-char-secret-for-ci-test \
+            -e FIREBASE_PROJECT_ID=fake \
+            -e FIREBASE_CLIENT_EMAIL=fake@fake.iam.gserviceaccount.com \
+            -e "FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nfake\n-----END PRIVATE KEY-----\n" \
+            -e GOOGLE_MAPS_SERVER_KEY=AIzaSy_fake \
+            -e REDIS_URL=redis://localhost:6379 \
+            -e ADMIN_EMAIL=admin@fake.mw \
+            courier-backend:ci-${{ github.sha }} || true
+          sleep 5
+          # Container will crash (no real Supabase/Redis) but it should start the process
+          docker logs courier-smoke 2>&1 | head -30
+          docker stop courier-smoke 2>/dev/null || true

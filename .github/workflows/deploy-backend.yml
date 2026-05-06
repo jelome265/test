@@ -1,0 +1,102 @@
+# .github/workflows/deploy-backend.yml
+#
+# Deploys backend to Railway when code is pushed to main.
+# Requires all CI checks to pass first (via needs:).
+#
+# Required secrets (set in GitHub repo settings):
+#   RAILWAY_TOKEN — Railway CLI token (from railway.app dashboard)
+#   RAILWAY_SERVICE_ID — backend service ID from Railway project
+#   SENTRY_AUTH_TOKEN — for Sentry release creation
+#   SENTRY_ORG
+#   SENTRY_PROJECT
+
+name: Deploy Backend (Production)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'
+      - 'packages/**'
+      - 'supabase/migrations/**'
+
+jobs:
+  # Gate: must pass all CI checks before deployment
+  ci:
+    uses: ./.github/workflows/backend-ci.yml
+    secrets: inherit
+
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [ci]
+    environment: production  # Requires manual approval gate if configured
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@latest
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up \
+            --service ${{ secrets.RAILWAY_SERVICE_ID }} \
+            --detach
+
+      - name: Wait for deployment health
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Waiting for Railway deployment to become healthy..."
+          sleep 30  # Railway takes ~30s to start Node containers
+
+          BACKEND_URL=$(railway domain --service ${{ secrets.RAILWAY_SERVICE_ID }} 2>/dev/null || echo "")
+          if [ -z "$BACKEND_URL" ]; then
+            echo "Could not get domain from Railway, skipping health check"
+            exit 0
+          fi
+
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://${BACKEND_URL}/api/v1/health" 2>/dev/null || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passed (attempt $i)"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — retrying in 10s…"
+            sleep 10
+          done
+
+          echo "❌ Health check failed after 10 attempts"
+          exit 1
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG:        ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT:    ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          version:     courier-backend@${{ github.sha }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "🚨 *Production Deployment Failed*\nRepo: ${{ github.repository }}\nCommit: ${{ github.sha }}\nActor: ${{ github.actor }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

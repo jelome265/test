@@ -27,6 +27,11 @@
  *   then sends SIGKILL. Our 30-second shutdown window must fit within this period.
  */
 
+// ─── MUST BE FIRST — instruments Node.js before any other code loads ─────────
+import { initSentry } from './config/sentry.js';
+initSentry();
+// ─────────────────────────────────────────────────────────────────────────────
+
 import http from 'http';
 
 import { createApp }  from './app.js';

@@ -1,6 +1,6 @@
 {
   "name": "courier-platform",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "packageManager": "npm@11.12.1",
   "workspaces": [

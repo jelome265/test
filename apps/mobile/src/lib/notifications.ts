@@ -79,6 +79,9 @@ export async function registerForPushNotifications(): Promise<string | null> {
   }
 }
 
+import { usePendingLinkStore } from '../stores/pending-link.store';
+import { useAuthStore }        from '../stores/auth.store';
+
 // ─── Deep link handler ────────────────────────────────────────────────────────
 /**
  * Navigate to the correct screen based on notification data.
@@ -92,6 +95,15 @@ export function handleNotificationNavigation(
 
   const screen = data['screen'];
   if (!screen) return;
+
+  const isInitializing  = useAuthStore.getState().isInitializing;
+  const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+  if (isInitializing || !isAuthenticated) {
+    // Auth not ready — queue the link for after initialization
+    usePendingLinkStore.getState().setPendingLink(screen);
+    return;
+  }
 
   // Small delay to let any transitional navigation settle
   setTimeout(() => {

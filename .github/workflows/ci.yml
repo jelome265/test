@@ -1,0 +1,34 @@
+name: CI — Package-level checks
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  package-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ["@courier/backend","@courier/mobile","@courier/shared-types","@courier/shared-validation","@courier/shared-constants"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run package tests
+        run: npm run test --workspace=${{ matrix.package }} --if-present
+
+      - name: Run package lint
+        run: npm run lint --workspace=${{ matrix.package }} --if-present
+
+      - name: Run package typecheck
+        run: npm run typecheck --workspace=${{ matrix.package }} --if-present

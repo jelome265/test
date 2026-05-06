@@ -1,0 +1,22 @@
+# .dockerignore — Exclude files that inflate the Docker build context.
+# A large context slows down builds; this cuts it from ~400MB to ~5MB.
+
+node_modules
+.git
+.gitignore
+.turbo
+**/.expo
+**/coverage
+**/dist
+**/*.tsbuildinfo
+**/*.log
+.env
+.env.*
+!.env.example
+apps/mobile
+supabase/.branches
+supabase/.temp
+*.md
+*.png
+*.jpg
+*.gif

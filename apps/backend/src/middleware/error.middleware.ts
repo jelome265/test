@@ -93,17 +93,34 @@ export const errorHandler: ErrorRequestHandler = (
     // Log at error level with full stack trace
     logger.error({ err: appError, ...logContext }, 'Non-operational error — possible bug');
 
-    // Capture in Sentry if configured
-    Sentry.withScope((scope) => {
-      scope.setTag('error.code',       appError.code);
-      scope.setTag('error.operational', String(appError.isOperational));
-      
-      if (req.user?.id) {
-        scope.setUser({ id: req.user.id });
-      }
+    // ─── Capture in Sentry (non-operational errors only) ──────────────────────
+    if (!appError.isOperational) {
+      Sentry.withScope((scope) => {
+        scope.setTag('error.code',         appError.code);
+        scope.setTag('error.operational',  'false');
+        scope.setTag('http.method',        req.method);
+        scope.setTag('http.url',           req.originalUrl);
+        scope.setLevel('error');
 
-      Sentry.captureException(appError);
-    });
+        if (req.user?.id) {
+          scope.setUser({
+            id:    req.user.id,
+            email: req.user.email,
+            role:  req.user.role,
+          });
+        }
+
+        // Add request body (scrubbed of sensitive fields)
+        const safeBody = { ...(req.body as Record<string, unknown> ?? {}) };
+        const SCRUB    = ['password', 'new_password', 'current_password',
+                          'confirm_password', 'token', 'fcm_token'];
+        for (const k of SCRUB) delete safeBody[k];
+        scope.setExtra('request.body', safeBody);
+        scope.setExtra('request.id',   req.headers['x-request-id']);
+
+        Sentry.captureException(appError);
+      });
+    }
   }
 
   // ─── Response ──────────────────────────────────────────────────────────────

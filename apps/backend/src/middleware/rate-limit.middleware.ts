@@ -26,6 +26,9 @@
 import { GLOBAL_RATE_LIMIT_PER_15MIN, AUTH_RATE_LIMIT_PER_15MIN, PAYMENT_RATE_LIMIT_PER_HOUR } from '@courier/shared-constants';
 import rateLimit from 'express-rate-limit';
 
+import { RedisStore } from 'rate-limit-redis';
+import { getRedis }   from '../config/redis.js';
+import { isProd }     from '../config/env.js';
 import { RateLimitError } from '../errors/app-error.js';
 
 // ─── Helper: rate limiter factory ────────────────────────────────────────────
@@ -36,18 +39,30 @@ function createLimiter(options: {
   message:    string;
   prefix:     string;
 }): ReturnType<typeof rateLimit> {
+  const store = isProd
+    ? new RedisStore({
+        prefix:       `rl:${options.prefix}:`,
+        sendCommand:  (...args: string[]) => getRedis().call(...args as [string, ...string[]]) as any,
+      })
+    : undefined;
+
   return rateLimit({
     windowMs:         options.windowMs,
     max:              options.max,
     standardHeaders:  'draft-7',  // Emit RateLimit-* headers per RFC 6585 draft 7
     legacyHeaders:    false,       // Disable X-RateLimit-* headers (deprecated)
+
+    // ── Redis store for multi-instance consistency ─────────────────
+    // Falls back to in-memory (MemoryStore) in test/dev for simplicity.
+    ...(store ? { store } : {}),
+
     keyGenerator:     (req) => {
       // Use forwarded IP if behind a trusted proxy (Railway, Fly.io, etc.)
       const forwardedFor = req.headers['x-forwarded-for'];
       const ip = Array.isArray(forwardedFor)
-        ? forwardedFor[0]
+        ? (forwardedFor[0] ?? req.ip ?? 'unknown')
         : (forwardedFor?.split(',')[0] ?? req.ip ?? 'unknown');
-      return `${options.prefix}:${ip}`;
+      return `${options.prefix}:${ip.trim()}`;
     },
     handler: (_req, _res, next) => {
       next(new RateLimitError(options.message));

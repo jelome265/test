@@ -14,13 +14,17 @@
  *   5. Global error handling
  */
 
+import compression from 'compression';
 import cors from 'cors';
 import express, { Router } from 'express';
 import helmet from 'helmet';
 
+import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { globalRateLimit } from './middleware/rate-limit.middleware.js';
 import { captureRawBody } from './middleware/raw-body.middleware.js';
+import { requestId } from './middleware/request-id.middleware.js';
+import { adminRouter } from './routes/admin.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { healthRouter } from './routes/health.routes.js';
 import { notificationRouter } from './routes/notification.routes.js';
@@ -33,14 +37,30 @@ export function createApp() {
   const app = express();
 
   // ─── 1. Security & Core Middleware ───────────────────────────────────────────
+  // Attach unique request ID
+  app.use(requestId);
+
   // Helmet adds secure HTTP headers (HSTS, CSP, etc.)
   app.use(helmet());
 
-  // CORS configuration
+  // CORS configuration — restricted to allowed origins
   app.use(cors({
-    origin:         ['*'], // Update this for production to specific domains
+    origin:         env.CORS_ALLOWED_ORIGINS,
     methods:        ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    // Expose RateLimit headers to clients
+    exposedHeaders: ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
+    // No credentials: we use Bearer tokens in Authorization header, not cookies
+    credentials:    false,
+  }));
+
+  // Gzip compression for performance
+  app.use(compression({
+    threshold: 1024,
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) return false;
+      return compression.filter(req, res);
+    },
   }));
 
   // Standard request logging (Pino-http)
@@ -85,7 +105,8 @@ export function createApp() {
 
   // Shipment Engine
   v1Router.use('/shipments',     shipmentRouter);
-  v1Router.use('/admin',         adminShipmentRouter);
+  v1Router.use('/admin',         adminRouter);
+  v1Router.use('/admin/shipments', adminShipmentRouter);
 
   // Payment System
   v1Router.use('/payments',      paymentRouter);

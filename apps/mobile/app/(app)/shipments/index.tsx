@@ -108,6 +108,17 @@ export default function ShipmentsScreen() {
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.4}
+          initialNumToRender={8}
+          maxToRenderPerBatch={8}
+          windowSize={5}
+          removeClippedSubviews={true}
+          getItemLayout={(_data, index) => ({
+            // ShipmentCard height: padding (16×2) + tracking (28) + route (24) + meta (20) + date (18) + gaps (16×3) = ~170
+            length: 170,
+            offset: 170 * index,
+            index,
+          })}
+          keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
             <EmptyState
               emoji="📦"

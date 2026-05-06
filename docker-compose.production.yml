@@ -1,0 +1,71 @@
+# docker-compose.production.yml
+#
+# Local production parity testing.
+# Mirrors the Railway topology: backend + Redis.
+# Supabase is remote (not containerized).
+#
+# Usage: docker-compose -f docker-compose.production.yml up --build
+#
+# Set all variables in .env (copy from .env.example).
+
+version: '3.9'
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test:     ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout:  3s
+      retries:  10
+    volumes:
+      - redis_data:/data
+    networks:
+      - courier
+
+  backend:
+    build:
+      context:    .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV:                 production
+      PORT:                     3000
+      CORS_ALLOWED_ORIGINS:     ${CORS_ALLOWED_ORIGINS}
+      SUPABASE_URL:             ${SUPABASE_URL}
+      SUPABASE_ANON_KEY:        ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      PAYCHANGU_PUBLIC_KEY:     ${PAYCHANGU_PUBLIC_KEY}
+      PAYCHANGU_SECRET_KEY:     ${PAYCHANGU_SECRET_KEY}
+      PAYCHANGU_WEBHOOK_SECRET: ${PAYCHANGU_WEBHOOK_SECRET}
+      PAYCHANGU_BASE_URL:       ${PAYCHANGU_BASE_URL}
+      BACKEND_BASE_URL:         ${BACKEND_BASE_URL}
+      FIREBASE_PROJECT_ID:      ${FIREBASE_PROJECT_ID}
+      FIREBASE_CLIENT_EMAIL:    ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_PRIVATE_KEY:     ${FIREBASE_PRIVATE_KEY}
+      GOOGLE_MAPS_SERVER_KEY:   ${GOOGLE_MAPS_SERVER_KEY}
+      REDIS_URL:                redis://redis:6379
+      SENTRY_DSN:               ${SENTRY_DSN}
+      SENTRY_ENVIRONMENT:       production
+      ADMIN_EMAIL:              ${ADMIN_EMAIL}
+    ports:
+      - '3000:3000'
+    networks:
+      - courier
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  redis_data:
+
+networks:
+  courier:
+    driver: bridge

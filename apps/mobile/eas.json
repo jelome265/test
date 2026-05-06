@@ -47,8 +47,16 @@
     "production": {
       "android": {
         "serviceAccountKeyPath": "./play-store-service-account.json",
-        "track": "internal",
-        "releaseStatus": "draft"
+        "track":                 "internal",
+        "releaseStatus":         "draft",
+        "changesNotSentForReview": false
+      },
+      "ios": {
+        "ascAppId":     "YOUR_APP_STORE_CONNECT_APP_ID",
+        "appleId":      "YOUR_APPLE_ID_EMAIL",
+        "ascApiKeyPath": "./app-store-key.p8",
+        "ascApiKeyId":   "YOUR_API_KEY_ID",
+        "ascApiIssuerId": "YOUR_ISSUER_ID"
       }
     }
   }
