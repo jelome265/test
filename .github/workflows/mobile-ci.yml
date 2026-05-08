@@ -40,13 +40,13 @@ jobs:
         run: npm ci
 
       - name: Lint mobile
-        run: npm run lint --filter=@courier/mobile
+        run: npx turbo run lint --filter=@courier/mobile
 
       - name: Typecheck mobile
-        run: npm run typecheck --filter=@courier/mobile
+        run: npx turbo run typecheck --filter=@courier/mobile
 
       - name: Run unit tests
-        run: npm run test --filter=@courier/mobile
+        run: npx turbo run test --filter=@courier/mobile
         env:
           # Prevents real API calls in tests
           EXPO_PUBLIC_API_URL:         http://localhost:3000/api
