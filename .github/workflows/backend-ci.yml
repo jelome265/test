@@ -48,13 +48,13 @@ jobs:
         run: npm ci
 
       - name: Lint backend
-        run: npm run lint --workspace=@courier/backend
+        run: npm run lint --filter=@courier/backend
 
       - name: Lint shared packages
         run: |
-          npm run lint --workspace=@courier/shared-types
-          npm run lint --workspace=@courier/shared-validation
-          npm run lint --workspace=@courier/shared-constants
+          npm run lint --filter=@courier/shared-types
+          npm run lint --filter=@courier/shared-validation
+          npm run lint --filter=@courier/shared-constants
 
       - name: Typecheck all
         run: npm run typecheck
@@ -108,10 +108,10 @@ jobs:
         run: npm ci
 
       - name: Run unit tests
-        run: npm run test --workspace=@courier/backend -- --reporter=verbose
+        run: npm run test --filter=@courier/backend -- --reporter=verbose
 
       - name: Run coverage report
-        run: npm run test:coverage --workspace=@courier/backend
+        run: npm run test:coverage --filter=@courier/backend
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
