@@ -1,12 +1,13 @@
 // src/hooks/use-payments.ts
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 
 import type { CourierApiError } from '../api/client';
 import { paymentsApi } from '../api/payments';
+
 import { queryClient } from './query-client';
 import { shipmentKeys } from './use-shipments';
-import { useEffect } from 'react';
 
 export function useInitiatePaymentMutation() {
   return useMutation({
@@ -40,7 +41,7 @@ export function useShipmentPayments(shipmentId: string) {
     if (query.data) {
       const hasPaid = query.data.some((p) => p.status === 'paid');
       if (hasPaid) {
-        queryClient.invalidateQueries({ queryKey: shipmentKeys.detail(shipmentId) });
+        void queryClient.invalidateQueries({ queryKey: shipmentKeys.detail(shipmentId) });
       }
     }
   }, [query.data, shipmentId]);

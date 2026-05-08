@@ -25,10 +25,11 @@
 
 import { GLOBAL_RATE_LIMIT_PER_15MIN, AUTH_RATE_LIMIT_PER_15MIN, PAYMENT_RATE_LIMIT_PER_HOUR } from '@courier/shared-constants';
 import rateLimit from 'express-rate-limit';
-
 import { RedisStore } from 'rate-limit-redis';
-import { getRedis }   from '../config/redis.js';
+import type { RedisReply } from 'rate-limit-redis';
+
 import { isProd }     from '../config/env.js';
+import { getRedis }   from '../config/redis.js';
 import { RateLimitError } from '../errors/app-error.js';
 
 // ─── Helper: rate limiter factory ────────────────────────────────────────────
@@ -42,7 +43,8 @@ function createLimiter(options: {
   const store = isProd
     ? new RedisStore({
         prefix:       `rl:${options.prefix}:`,
-        sendCommand:  (...args: string[]) => getRedis().call(...args as [string, ...string[]]) as any,
+        sendCommand:  (command: string, ...args: string[]) =>
+          getRedis().call(command, ...args) as Promise<RedisReply>,
       })
     : undefined;
 

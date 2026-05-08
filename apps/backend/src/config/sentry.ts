@@ -21,7 +21,7 @@
  */
 
 import * as Sentry from '@sentry/node';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import { createRequire } from 'node:module';
 
 // Read environment directly — env.ts validates later.
 // This avoids circular import (env.ts imports logger which may import sentry).
@@ -30,6 +30,19 @@ const environment = process.env['SENTRY_ENVIRONMENT'] ?? process.env['NODE_ENV']
 const version     = process.env['npm_package_version'] ?? '1.7.0';
 const isProduction = environment === 'production';
 const isTest       = environment === 'test';
+const require = createRequire(import.meta.url);
+
+function getProfilingIntegrations(): Array<ReturnType<typeof Sentry.httpIntegration>> {
+  try {
+    // Native addon can fail to load on architecture mismatches; keep tracing alive.
+    const { nodeProfilingIntegration } = require('@sentry/profiling-node') as {
+      nodeProfilingIntegration: () => unknown;
+    };
+    return [nodeProfilingIntegration() as ReturnType<typeof Sentry.httpIntegration>];
+  } catch {
+    return [];
+  }
+}
 
 export function initSentry(): void {
   // Skip in test and dev without a DSN
@@ -46,9 +59,6 @@ export function initSentry(): void {
     // 10% in production, 50% in staging, 100% in development (if DSN present).
     tracesSampleRate: isProduction ? 0.10 : 0.50,
 
-    // Profiling: only in production, 10% of traced requests
-    profilesSampleRate: isProduction ? 0.10 : 0,
-
     integrations: [
       // Auto-instrument: http, https, net, dns, child_process, fs
       Sentry.httpIntegration(),
@@ -57,7 +67,7 @@ export function initSentry(): void {
       Sentry.expressIntegration(),
 
       // Profiling (requires @sentry/profiling-node)
-      ...(isProduction ? [nodeProfilingIntegration()] : []),
+      ...(isProduction ? getProfilingIntegrations() : []),
     ],
 
     // Scrub sensitive data before sending to Sentry

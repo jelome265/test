@@ -11,6 +11,7 @@
  *   5. Open disputes indicator
  */
 
+import { tambalaToMwk } from '@courier/shared-constants';
 import {
   RefreshControl,
   ScrollView,
@@ -19,11 +20,10 @@ import {
   View,
 } from 'react-native';
 
-import { tambalaToMwk } from '@courier/shared-constants';
 
 import { ErrorState }      from '../../../src/components/ui/ErrorState';
-import { LoadingState }    from '../../../src/components/ui/LoadingState';
 import { KpiCard }         from '../../../src/components/ui/KpiCard';
+import { LoadingState }    from '../../../src/components/ui/LoadingState';
 import { ShipmentFunnel }  from '../../../src/components/ui/ShipmentFunnel';
 import { usePlatformStats } from '../../../src/hooks/use-admin';
 import { colors, spacing, typography, radius } from '../../../src/theme';

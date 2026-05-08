@@ -40,12 +40,6 @@ export function initMobileSentry(): void {
       }
       return event;
     },
-
-    integrations: [
-      new Sentry.ReactNativeTracing({
-        routingInstrumentation: new Sentry.ReactNavigationInstrumentation(),
-      }),
-    ],
   });
 }
 

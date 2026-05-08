@@ -1,13 +1,13 @@
 // app/(app)/shipments/create/step-3.tsx
+import { tambalaToMwk } from '@courier/shared-constants';
+import type { CreateShipmentInput } from '@courier/shared-validation';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { tambalaToMwk } from '@courier/shared-constants';
 
 import { Button }                    from '../../../../src/components/ui/Button';
-import { useCreateShipmentMutation } from '../../../../src/hooks/use-shipments';
-import { useQuote }                  from '../../../../src/hooks/use-shipments';
+import { useCreateShipmentMutation , useQuote } from '../../../../src/hooks/use-shipments';
 import { useDraftStore }             from '../../../../src/stores/shipment-draft.store';
 import { colors, spacing, typography, radius } from '../../../../src/theme';
 
@@ -21,7 +21,7 @@ export default function CreateStep3() {
       ? {
           pickup_city:   draft.sender.city,
           delivery_city: draft.receiver.city,
-          weight_kg:     draft.package.weight_kg as number,
+          weight_kg:     draft.package.weight_kg,
           is_fragile:    draft.package.is_fragile,
         }
       : null,
@@ -34,31 +34,40 @@ export default function CreateStep3() {
   }, [quote]);
 
   const onSubmit = () => {
-    if (!draft.sender.city || !draft.receiver.city) return;
+    if (
+      !draft.sender.city
+      || !draft.receiver.city
+      || draft.package.weight_kg === ''
+      || draft.package.size === ''
+    ) {
+      return;
+    }
 
-    createShipment({
+    const payload: CreateShipmentInput = {
       sender: {
         full_name:    draft.sender.full_name,
         phone_number: draft.sender.phone_number,
         email:        draft.sender.email,
         address:      draft.sender.address,
-        city:         draft.sender.city as any,
+        city:         draft.sender.city,
       },
       receiver: {
         full_name:    draft.receiver.full_name,
         phone_number: draft.receiver.phone_number,
         email:        draft.receiver.email,
         address:      draft.receiver.address,
-        city:         draft.receiver.city as any,
+        city:         draft.receiver.city,
       },
       package: {
-        weight_kg:   draft.package.weight_kg as number,
-        size:        draft.package.size as any,
+        weight_kg:   draft.package.weight_kg,
+        size:        draft.package.size,
         description: draft.package.description,
         is_fragile:  draft.package.is_fragile,
       },
       delivery_notes: draft.delivery_notes,
-    });
+    };
+
+    createShipment(payload);
   };
 
   const priceMwk = quote ? tambalaToMwk(quote.total_mwk) : null;

@@ -1,4 +1,5 @@
 // app/(admin)/shipments/index.tsx
+import type { Shipment, ShipmentStatus } from '@courier/shared-types';
 import { useState, useCallback } from 'react';
 import {
   FlatList,
@@ -9,7 +10,6 @@ import {
   View,
 } from 'react-native';
 
-import type { ShipmentStatus, Shipment } from '@courier/shared-types';
 
 import { EmptyState }      from '../../../src/components/ui/EmptyState';
 import { ErrorState }      from '../../../src/components/ui/ErrorState';
@@ -34,7 +34,7 @@ export default function AdminShipmentsScreen() {
     data, isLoading, isError, refetch, fetchNextPage, hasNextPage,
   } = useAdminShipments({ status: statusFilter, search: search.length >= 3 ? search : undefined });
 
-  const shipments = data?.pages.flatMap((p: any) => p.data) ?? [];
+  const shipments = data?.pages.flatMap((page) => page.data) ?? [];
 
   const renderItem = useCallback(
     ({ item }: { item: Shipment }) => <ShipmentCard shipment={item} adminMode />,
@@ -89,7 +89,11 @@ export default function AdminShipmentsScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          onEndReached={() => hasNextPage && fetchNextPage()}
+          onEndReached={() => {
+            if (hasNextPage) {
+              void fetchNextPage();
+            }
+          }}
           onEndReachedThreshold={0.4}
           ListEmptyComponent={<EmptyState emoji="📋" title="No shipments found" />}
           refreshControl={

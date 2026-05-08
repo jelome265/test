@@ -1,4 +1,5 @@
 // app/(app)/shipments/index.tsx
+import type { Shipment, ShipmentStatus } from '@courier/shared-types';
 import { useRouter } from 'expo-router';
 import { useState, useCallback } from 'react';
 import {
@@ -9,13 +10,12 @@ import {
   View,
 } from 'react-native';
 
-import type { ShipmentStatus, Shipment } from '@courier/shared-types';
 
+import { Button }       from '../../../src/components/ui/Button';
 import { EmptyState }   from '../../../src/components/ui/EmptyState';
 import { ErrorState }   from '../../../src/components/ui/ErrorState';
 import { LoadingState } from '../../../src/components/ui/LoadingState';
 import { ShipmentCard } from '../../../src/components/ui/ShipmentCard';
-import { Button }       from '../../../src/components/ui/Button';
 import { useMyShipments } from '../../../src/hooks/use-shipments';
 import { colors, spacing, typography, radius } from '../../../src/theme';
 
@@ -41,7 +41,7 @@ export default function ShipmentsScreen() {
     isFetchingNextPage,
   } = useMyShipments(statusFilter);
 
-  const shipments = data?.pages.flatMap((p: any) => p.data) ?? [];
+  const shipments = data?.pages.flatMap((page) => page.data) ?? [];
 
   const renderItem = useCallback(
     ({ item }: { item: Shipment }) => <ShipmentCard shipment={item} />,
@@ -106,7 +106,11 @@ export default function ShipmentsScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          onEndReached={() => hasNextPage && fetchNextPage()}
+          onEndReached={() => {
+            if (hasNextPage) {
+              void fetchNextPage();
+            }
+          }}
           onEndReachedThreshold={0.4}
           initialNumToRender={8}
           maxToRenderPerBatch={8}

@@ -8,6 +8,7 @@ import { LoadingState } from '../../../../src/components/ui/LoadingState';
 import { StatusBadge }  from '../../../../src/components/ui/StatusBadge';
 import { useTrackShipment } from '../../../../src/hooks/use-shipments';
 import { colors, spacing, typography, radius } from '../../../../src/theme';
+import type { ShipmentStatus } from '@courier/shared-types';
 
 export default function PublicTrackingScreen() {
   const { trackingNumber } = useLocalSearchParams<{ trackingNumber: string }>();
@@ -29,9 +30,11 @@ export default function PublicTrackingScreen() {
         <View style={styles.trackingCard}>
           <Text style={styles.trackingLabel}>TRACKING NUMBER</Text>
           <Text style={styles.trackingNumber}>{shipment.tracking_number}</Text>
-          <View style={styles.badgeRow}>
-            <StatusBadge status={shipment.status as any} />
-          </View>
+          {shipment.status && (
+            <View style={styles.badgeRow}>
+              <StatusBadge status={shipment.status as ShipmentStatus} />
+            </View>
+          )}
         </View>
 
         <View style={styles.infoCard}>

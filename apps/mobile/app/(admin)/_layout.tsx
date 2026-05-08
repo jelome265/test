@@ -5,8 +5,8 @@ import { Tabs } from 'expo-router';
 import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
-import { colors, typography } from '../../src/theme';
 import { AdminGuard } from '../../src/components/layout/AdminGuard';
+import { colors, typography } from '../../src/theme';
 
 const ADMIN_ICONS = {
   shipments: {

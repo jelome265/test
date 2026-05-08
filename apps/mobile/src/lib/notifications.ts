@@ -20,10 +20,13 @@
 
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
+import { PermissionStatus } from 'expo-modules-core';
+import { router, type Href } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { authApi } from '../api/auth';
+import { useAuthStore } from '../stores/auth.store';
+import { usePendingLinkStore } from '../stores/pending-link.store';
 
 // ─── Notification presentation ────────────────────────────────────────────────
 // Show notification banner even when app is in foreground
@@ -32,8 +35,6 @@ Notifications.setNotificationHandler({
     shouldShowAlert:   true,
     shouldPlaySound:   true,
     shouldSetBadge:    true,
-    shouldShowBanner:  true,
-    shouldShowList:    true,
   }),
 });
 
@@ -58,12 +59,12 @@ export async function registerForPushNotifications(): Promise<string | null> {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
 
-  if (existingStatus !== 'granted') {
+  if (existingStatus !== PermissionStatus.GRANTED) {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
 
-  if (finalStatus !== 'granted') return null;
+  if (finalStatus !== PermissionStatus.GRANTED) return null;
 
   try {
     // Get FCM device token (not Expo Push Token — we use FCM directly via Firebase Admin)
@@ -78,9 +79,6 @@ export async function registerForPushNotifications(): Promise<string | null> {
     return null;
   }
 }
-
-import { usePendingLinkStore } from '../stores/pending-link.store';
-import { useAuthStore }        from '../stores/auth.store';
 
 // ─── Deep link handler ────────────────────────────────────────────────────────
 /**
@@ -108,7 +106,7 @@ export function handleNotificationNavigation(
   // Small delay to let any transitional navigation settle
   setTimeout(() => {
     try {
-      router.push(screen as any);
+      router.push(screen as Href);
     } catch {
       // Screen may not be accessible (e.g. admin screen for a customer)
       router.push('/(app)/notifications');

@@ -5,8 +5,8 @@ import { Tabs } from 'expo-router';
 import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
-import { colors, typography } from '../../src/theme';
 import { useNotificationStore } from '../../src/stores/notification.store';
+import { colors, typography } from '../../src/theme';
 
 // Icon name map keeps variant switching (outline vs filled) in one place.
 // Filled variant is used when the tab is active — matches iOS HIG conventions.

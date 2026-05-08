@@ -1,10 +1,10 @@
 // src/api/auth.ts
+import type { UserProfile } from '@courier/shared-types';
 import type {
   RegisterInput,
   LoginInput,
   ChangePasswordInput,
 } from '@courier/shared-validation';
-import type { UserProfile } from '@courier/shared-types';
 
 import { apiClient } from './client';
 

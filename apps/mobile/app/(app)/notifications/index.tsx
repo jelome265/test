@@ -1,5 +1,7 @@
 // app/(app)/notifications/index.tsx
-import React, { useCallback } from 'react';
+import type { AppNotification } from '@courier/shared-types';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useCallback, useEffect } from 'react';
 import {
   FlatList,
   Pressable,
@@ -8,16 +10,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useQuery, useMutation } from '@tanstack/react-query';
 
-import type { AppNotification } from '@courier/shared-types';
 
+import { notificationsApi } from '../../../src/api/notifications';
+import { Button }       from '../../../src/components/ui/Button';
 import { EmptyState }   from '../../../src/components/ui/EmptyState';
 import { LoadingState } from '../../../src/components/ui/LoadingState';
-import { Button }       from '../../../src/components/ui/Button';
-import { notificationsApi } from '../../../src/api/notifications';
-import { useNotificationStore } from '../../../src/stores/notification.store';
 import { queryClient } from '../../../src/hooks/query-client';
+import { useNotificationStore } from '../../../src/stores/notification.store';
 import { colors, spacing, typography } from '../../../src/theme';
 
 export default function NotificationsScreen() {
@@ -29,7 +29,7 @@ export default function NotificationsScreen() {
   });
 
   // Effect to update unread count when data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
       setUnreadCount(data.unread_count);
     }
@@ -38,7 +38,7 @@ export default function NotificationsScreen() {
   const { mutate: markAllRead, isPending: isMarkingAll } = useMutation({
     mutationFn: notificationsApi.markAllAsRead,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setUnreadCount(0);
     },
   });
@@ -46,7 +46,7 @@ export default function NotificationsScreen() {
   const { mutate: markOneRead } = useMutation({
     mutationFn: (id: string) => notificationsApi.markAsRead(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setUnreadCount(Math.max(0, (data?.unread_count ?? 1) - 1));
     },
   });
@@ -74,7 +74,9 @@ export default function NotificationsScreen() {
             size="sm"
             isLoading={isMarkingAll}
             disabled={isMarkingAll}
-            onPress={() => markAllRead()}
+            onPress={() => {
+              markAllRead();
+            }}
           >
             Mark all read
           </Button>

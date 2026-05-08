@@ -1,5 +1,6 @@
 // src/components/ui/LoadingState.tsx
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+
 import { colors, spacing, typography } from '../../theme';
 
 export function LoadingState({ message = 'Loading...' }: { message?: string }) {

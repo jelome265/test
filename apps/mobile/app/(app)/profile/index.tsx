@@ -4,8 +4,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button }           from '../../../src/components/ui/Button';
 import { LoadingState }     from '../../../src/components/ui/LoadingState';
-import { useMyProfile }     from '../../../src/hooks/use-auth';
-import { useLogoutMutation } from '../../../src/hooks/use-auth';
+import { useMyProfile , useLogoutMutation }     from '../../../src/hooks/use-auth';
 import { useAuthStore }     from '../../../src/stores/auth.store';
 import { colors, spacing, typography, radius } from '../../../src/theme';
 

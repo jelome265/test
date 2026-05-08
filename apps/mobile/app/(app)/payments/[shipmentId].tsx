@@ -3,21 +3,21 @@
  * Payment screen.
  */
 
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Controller, useForm } from 'react-hook-form';
-
 import { tambalaToMwk } from '@courier/shared-constants';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button }              from '../../../src/components/ui/Button';
-import { Input }               from '../../../src/components/ui/Input';
-import { ErrorState }          from '../../../src/components/ui/ErrorState';
-import { LoadingState }        from '../../../src/components/ui/LoadingState';
-import { useShipment }         from '../../../src/hooks/use-shipments';
-import { useInitiatePaymentMutation, useShipmentPayments } from '../../../src/hooks/use-payments';
-import { colors, spacing, typography, radius } from '../../../src/theme';
+
 import type { PaymentMethod } from '../../../src/api/payments';
+import { Button }              from '../../../src/components/ui/Button';
+import { ErrorState }          from '../../../src/components/ui/ErrorState';
+import { Input }               from '../../../src/components/ui/Input';
+import { LoadingState }        from '../../../src/components/ui/LoadingState';
+import { useInitiatePaymentMutation, useShipmentPayments } from '../../../src/hooks/use-payments';
+import { useShipment }         from '../../../src/hooks/use-shipments';
+import { colors, spacing, typography, radius } from '../../../src/theme';
 
 type FormValues = {
   method:       PaymentMethod;
@@ -40,14 +40,13 @@ export default function PaymentScreen() {
   const { shipmentId } = useLocalSearchParams<{ shipmentId: string }>();
   const router = useRouter();
 
-  const [idemKey] = useState(() => {
-    const prefix = (shipmentId ?? '').replace(/-/g, '').substring(0, 8).toLowerCase();
-    const suffix  = 'xxxxxxxxxxxxxxxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));
-    return `${prefix}-4xxx-yxxx-${suffix}`.replace(/[xy]/g, (c) => {
+  const [idemKey] = useState(() =>
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = (Math.random() * 16) | 0;
-      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-    });
-  });
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    }),
+  );
 
   const { data: shipment, isLoading: isShipmentLoading, isError } = useShipment(shipmentId ?? '');
   const { data: payments } = useShipmentPayments(shipmentId ?? '');
@@ -65,9 +64,13 @@ export default function PaymentScreen() {
 
   // Watch for payment resolution via polling
   useEffect(() => {
-    const latestPayment = (payments as any)?.[0];
+    const latestPayment = payments?.[0];
     if (latestPayment?.status === 'paid') {
-      router.replace(`/(app)/shipments/${shipmentId}` as any);
+      const shipmentRoute: Href = {
+        pathname: '/(app)/shipments/[id]',
+        params: { id: shipmentId ?? '' },
+      };
+      router.replace(shipmentRoute);
     }
   }, [payments, shipmentId]);
 
@@ -173,7 +176,9 @@ export default function PaymentScreen() {
             fullWidth
             isLoading={isPending}
             disabled={isPending}
-            onPress={handleSubmit(onPay)}
+            onPress={() => {
+              void handleSubmit(onPay)();
+            }}
           >
             Pay MWK {priceMwk.toLocaleString('en-MW')}
           </Button>

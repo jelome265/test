@@ -13,6 +13,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import crypto from 'crypto';
 import { createApp } from '../../src/app.js';
 import type { Express } from 'express';
 import { supabaseServiceRole } from '../../src/config/supabase.js';
@@ -162,7 +163,7 @@ describe('Shipment Lifecycle E2E', () => {
 
   // ── Step 6: Customer initiates payment ───────────────────────────────────
   it('POST /api/v1/payments/initiate — customer initiates payment', async () => {
-    const idempotencyKey = `e2e-pay-${suffix}`;
+    const idempotencyKey = crypto.randomUUID();
 
     const res = await request(app)
       .post('/api/v1/payments/initiate')

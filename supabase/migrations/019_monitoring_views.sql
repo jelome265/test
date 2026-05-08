@@ -91,3 +91,5 @@ GRANT SELECT ON v_daily_revenue              TO authenticated;
 GRANT SELECT ON v_approval_queue_depth       TO authenticated;
 GRANT SELECT ON v_push_failure_rate_24h      TO authenticated;
 -- v_stale_payment_alert is service-role only (alerting webhook)
+REVOKE SELECT ON v_stale_payment_alert FROM authenticated;
+REVOKE SELECT ON v_stale_payment_alert FROM anon;

@@ -5,11 +5,12 @@
  * Uses pure RN View layout — no chart library dependency.
  */
 
+import { STATUS_LABELS } from '@courier/shared-constants';
+import type { ShipmentStatus } from '@courier/shared-types';
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { STATUS_LABELS } from '@courier/shared-constants';
-import type { ShipmentStatus } from '@courier/shared-types';
+
 import { colors, spacing, typography, radius } from '../../theme';
 
 interface ShipmentFunnelProps {

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
 jest.mock('../api/notifications', () => ({
   notificationsApi: {
-    getUnreadCount: jest.fn().mockResolvedValue(0),
+    getUnreadCount: jest.fn(async () => 0),
   },
 }));
 

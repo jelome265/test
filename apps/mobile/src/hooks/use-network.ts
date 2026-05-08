@@ -8,8 +8,8 @@
  */
 
 import NetInfo from '@react-native-community/netinfo';
-import { useEffect, useState } from 'react';
 import { focusManager } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 export interface NetworkState {
   isConnected:      boolean | null;

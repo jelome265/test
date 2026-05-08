@@ -13,11 +13,11 @@
 import { Router }      from 'express';
 import type { Request, Response } from 'express';
 
+import { supabaseServiceRole } from '../config/supabase.js';
+import { mapSupabaseError }  from '../errors/app-error.js';
 import { requireAuth }      from '../middleware/auth.middleware.js';
 import { requireAdminRole } from '../middleware/rbac.middleware.js';
-import { supabaseServiceRole } from '../config/supabase.js';
 import { asyncHandler }     from '../utils/async-handler.js';
-import { mapSupabaseError }  from '../errors/app-error.js';
 import { logger }           from '../utils/logger.js';
 
 export const adminRouter = Router();
@@ -36,12 +36,27 @@ adminRouter.get(
   '/stats',
   requireAuth,
   requireAdminRole,
-  asyncHandler(async (_req: Request, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { data, error } = await supabaseServiceRole().rpc('get_platform_stats');
 
     if (error) {
       logger.error({ error: error.message }, 'get_platform_stats RPC failed');
       throw mapSupabaseError(error);
+    }
+
+    const { error: auditError } = await supabaseServiceRole()
+      .from('audit_log')
+      .insert({
+        event_type:  'admin_rpc_called',
+        actor_id:    req.user!.id,
+        actor_role:  req.user!.role,
+        actor_ip:    req.ip ?? null,
+        target_type: 'platform',
+        payload:     { rpc: 'get_platform_stats' },
+      });
+
+    if (auditError) {
+      logger.error({ error: auditError.message }, 'admin stats audit log write failed');
     }
 
     res.setHeader('Cache-Control', 'private, max-age=60');

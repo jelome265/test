@@ -11,11 +11,12 @@
  *   - No request body logging in production
  */
 
-import axios, {
+import type {
   AxiosError,
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from 'axios';
+import axios from 'axios';
 
 import * as storage from '../lib/storage';
 

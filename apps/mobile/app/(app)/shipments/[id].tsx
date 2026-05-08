@@ -1,5 +1,6 @@
 // app/(app)/shipments/[id].tsx
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { tambalaToMwk } from '@courier/shared-constants';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import {
   Alert,
   RefreshControl,
@@ -9,7 +10,6 @@ import {
   View,
 } from 'react-native';
 
-import { tambalaToMwk } from '@courier/shared-constants';
 
 import { Button }       from '../../../src/components/ui/Button';
 import { ErrorState }   from '../../../src/components/ui/ErrorState';
@@ -76,7 +76,13 @@ export default function ShipmentDetailScreen() {
               variant="primary"
               size="lg"
               fullWidth
-              onPress={() => router.push(`/(app)/payments/${shipment.id}` as any)}
+              onPress={() => {
+                const paymentRoute: Href = {
+                  pathname: '/(app)/payments/[shipmentId]',
+                  params: { shipmentId: shipment.id },
+                };
+                router.push(paymentRoute);
+              }}
             >
               Pay MWK {priceMwk.toLocaleString('en-MW')}
             </Button>

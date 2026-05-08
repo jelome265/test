@@ -1,17 +1,18 @@
 // app/(auth)/login.tsx
+import { LoginSchema, type LoginInput } from '@courier/shared-validation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { useRef } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import type {
+  TextInput} from 'react-native';
 import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
-import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 
-import { LoginSchema, type LoginInput } from '@courier/shared-validation';
 
 import { Button }           from '../../src/components/ui/Button';
 import { Input }            from '../../src/components/ui/Input';

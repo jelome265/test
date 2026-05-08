@@ -5,9 +5,9 @@
  * Reports to Sentry (if configured) before showing the fallback UI.
  */
 
+import * as Sentry from '@sentry/react-native';
 import React, { Component, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Sentry from '@sentry/react-native';
 
 import { colors, spacing, typography } from '../../theme';
 
@@ -25,7 +25,7 @@ export class AppErrorBoundary extends Component<Props, State> {
     const eventId = Sentry.captureException(error, {
       extra: { componentStack: info.componentStack },
     });
-    this.setState({ eventId: eventId ?? null });
+    this.setState({ eventId: eventId || null });
   }
 
   handleReset = (): void => {

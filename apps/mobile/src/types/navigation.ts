@@ -1,5 +1,5 @@
 // src/types/navigation.ts
-import { Href } from 'expo-router';
+import type { Href } from 'expo-router';
 
 /**
  * Strongly typed navigation parameters for common app routes.

@@ -1,11 +1,12 @@
 // src/components/ui/ShipmentCard.tsx
-import { useRouter } from 'expo-router';
+import { tambalaToMwk } from '@courier/shared-constants';
+import type { Shipment } from '@courier/shared-types';
+import { useRouter, type Href } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Shipment } from '@courier/shared-types';
-import { tambalaToMwk } from '@courier/shared-constants';
 
 import { colors, spacing, radius, typography } from '../../theme';
+
 import { StatusBadge } from './StatusBadge';
 
 interface ShipmentCardProps {
@@ -16,13 +17,15 @@ interface ShipmentCardProps {
 export function ShipmentCard({ shipment, adminMode = false }: ShipmentCardProps) {
   const router = useRouter();
 
-  const basePath = adminMode ? '/(admin)/shipments' : '/(app)/shipments';
   const price    = shipment.final_price_mwk ?? shipment.quoted_price_mwk;
   const priceMwk = tambalaToMwk(price);
+  const detailRoute: Href = adminMode
+    ? { pathname: '/(admin)/shipments/[id]', params: { id: shipment.id } }
+    : { pathname: '/(app)/shipments/[id]', params: { id: shipment.id } };
 
   return (
     <Pressable
-      onPress={() => router.push(`${basePath}/${shipment.id}` as any)}
+      onPress={() => router.push(detailRoute)}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       accessibilityRole="button"
       accessibilityLabel={`Shipment ${shipment.tracking_number}`}

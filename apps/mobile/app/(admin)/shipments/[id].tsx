@@ -1,4 +1,6 @@
 // app/(admin)/shipments/[id].tsx
+import { ALLOWED_TRANSITIONS } from '@courier/shared-constants';
+import type { ShipmentStatus } from '@courier/shared-types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -10,8 +12,6 @@ import {
   View,
 } from 'react-native';
 
-import { ALLOWED_TRANSITIONS } from '@courier/shared-constants';
-import type { ShipmentStatus } from '@courier/shared-types';
 
 import { Button }      from '../../../src/components/ui/Button';
 import { ErrorState }  from '../../../src/components/ui/ErrorState';
@@ -84,7 +84,7 @@ export default function AdminShipmentDetailScreen() {
                   variant="secondary"
                   size="sm"
                   onPress={() => {
-                    setTargetStatus(status as any);
+                    setTargetStatus(status);
                     setShowModal(true);
                   }}
                 >

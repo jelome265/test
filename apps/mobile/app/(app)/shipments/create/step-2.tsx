@@ -1,10 +1,10 @@
 // app/(app)/shipments/create/step-2.tsx
-import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { Controller, useForm } from 'react-hook-form';
-
 import { SUPPORTED_CITIES } from '@courier/shared-constants';
 import type { SupportedCity, PackageSize } from '@courier/shared-types';
+import { useRouter } from 'expo-router';
+import { Controller, useForm } from 'react-hook-form';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+
 
 import { Button } from '../../../../src/components/ui/Button';
 import { Input }  from '../../../../src/components/ui/Input';

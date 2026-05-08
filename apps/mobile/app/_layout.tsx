@@ -9,15 +9,17 @@
  *   - authenticated + admin    → /(admin)/shipments
  */
 
-import { initMobileSentry } from '../src/lib/sentry';
-initMobileSentry();
+// MUST remain the first import so Sentry initializes before app modules load.
+import '../src/lib/sentry-init';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Stack, router, usePathname } from 'expo-router';
+import { Stack, router, type Href, usePathname } from 'expo-router';
 import { useEffect } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import Toast from 'react-native-toast-message';
 
+import { AppErrorBoundary }          from '../src/components/layout/AppErrorBoundary';
+import { OfflineBanner }             from '../src/components/ui/OfflineBanner';
 import { queryClient }               from '../src/hooks/query-client';
 import {
   addNotificationResponseListener,
@@ -27,8 +29,6 @@ import {
 import { useAuthStore }              from '../src/stores/auth.store';
 import { useNotificationStore }      from '../src/stores/notification.store';
 import { usePendingLinkStore }       from '../src/stores/pending-link.store';
-import { OfflineBanner }             from '../src/components/ui/OfflineBanner';
-import { AppErrorBoundary }          from '../src/components/layout/AppErrorBoundary';
 
 function AuthGate() {
   const { isAuthenticated, isInitializing, user, _initialize } = useAuthStore();
@@ -80,7 +80,7 @@ function AuthGate() {
         const target = role === 'admin' || role === 'super_admin'
           ? '/(admin)/shipments'
           : '/(app)/shipments';
-        router.replace(target as any);
+        router.replace(target);
       }
 
       // Prevent customers from accessing admin routes
@@ -98,7 +98,7 @@ function AuthGate() {
     clearPendingLink();
     setTimeout(() => {
       try {
-        router.push(pendingLink as any);
+        router.push(pendingLink as Href);
       } catch {
         // Link may be invalid (e.g. admin link for customer) — swallow
       }

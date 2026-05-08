@@ -1,8 +1,8 @@
 // src/components/ui/StatusBadge.tsx
-import { StyleSheet, Text, View } from 'react-native';
 
 import { STATUS_LABELS } from '@courier/shared-constants';
 import type { ShipmentStatus } from '@courier/shared-types';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, spacing, radius, typography } from '../../theme';
 

@@ -1,12 +1,12 @@
 // app/(app)/shipments/create/step-1.tsx
-import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-import { SenderSchema } from '@courier/shared-validation';
-import type { SupportedCity } from '@courier/shared-types';
 import { SUPPORTED_CITIES } from '@courier/shared-constants';
+import type { SupportedCity } from '@courier/shared-types';
+import { SenderSchema } from '@courier/shared-validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import { Controller, useForm } from 'react-hook-form';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
 
 import { Button }  from '../../../../src/components/ui/Button';
 import { Input }   from '../../../../src/components/ui/Input';
